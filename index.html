@@ -310,6 +310,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 
     <button class="btn btn-gold" onclick="connectToPeer()" id="connect-btn">Connect &amp; Challenge</button>
     <button class="btn btn-outline" onclick="startSolo()">▶ Solo Practice (vs AI)</button>
+    <div id="conn-debug" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .75rem;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--text3);line-height:1.6"></div>
   </div>
 </div>
 
@@ -555,51 +556,107 @@ let state={
 };
 
 // ─── PEER.JS SETUP ───────────────────────────────────────────────────────────
+function connLog(msg){
+  const el=document.getElementById('conn-debug');
+  if(!el) return;
+  el.style.display='block';
+  const t=new Date().toLocaleTimeString('en-GB',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el.innerHTML+=`<div>[${t}] ${msg}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+
 function initPeer(){
-  const peer=new Peer(undefined,{debug:0});
+  const peer=new Peer(undefined,{
+    debug:1,
+    config:{
+      iceServers:[
+        {urls:'stun:stun.l.google.com:19302'},
+        {urls:'stun:stun1.l.google.com:19302'}
+      ]
+    }
+  });
   state.peer=peer;
   peer.on('open',id=>{
     document.getElementById('my-peer-id').textContent=id;
+    connLog("Peer open. Your ID: "+id.slice(0,8)+"…");
+    toast("Your ID ready – share it!","info");
   });
+  // HOST side: someone connected TO us – wait for their handshake before starting
   peer.on('connection',conn=>{
+    state.myName=document.getElementById('my-name').value.trim()||"Detective";
+    state.isHost=true;
     setupConn(conn);
-    toast("Opponent connected!","success");
-    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Connected</div>`;
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Opponent connected – waiting for handshake…</div>`;
   });
-  peer.on('error',e=>toast("PeerJS: "+e.type,"error"));
+  peer.on('error',e=>{
+    connLog("ERROR: "+e.type+" – "+e.message);
+    toast("PeerJS error: "+e.type,"error");
+    document.getElementById('my-peer-id').textContent="Error – refresh page";
+  });
+  peer.on('disconnected',()=>{
+    peer.reconnect();
+  });
 }
 
 function setupConn(conn){
   state.conn=conn;
   conn.on('data',handleData);
-  conn.on('close',()=>toast("Connection lost","error"));
-  conn.on('error',e=>toast("Conn error: "+e,"error"));
+  conn.on('close',()=>toast("Connection closed","error"));
+  conn.on('error',e=>toast("Conn error","error"));
 }
 
 function connectToPeer(){
   const id=document.getElementById('opp-id-input').value.trim();
   const name=document.getElementById('my-name').value.trim()||"Detective";
   if(!id){toast("Enter opponent ID","error");return}
+  if(id===document.getElementById('my-peer-id').textContent){toast("That is your own ID!","error");return}
   state.myName=name;
-  const conn=state.peer.connect(id);
+  state.isHost=false;
+  const btn=document.getElementById('connect-btn');
+  btn.textContent="Connecting…";btn.disabled=true;
+  const conn=state.peer.connect(id,{reliable:true});
   setupConn(conn);
   conn.on('open',()=>{
-    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Connected</div>`;
-    toast("Connected! Sending handshake…","info");
-    sendMsg_raw({type:"handshake",name:state.myName});
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Connected – shaking hands…</div>`;
+    // Small delay to ensure data channel is fully open before sending
+    connLog("Channel open – sending handshake as joiner");
+    setTimeout(()=>sendMsg_raw({type:"handshake",name:state.myName}),300);
   });
+  conn.on('error',e=>{
+    toast("Could not connect – check the ID","error");
+    btn.textContent="Connect & Challenge";btn.disabled=false;
+  });
+  setTimeout(()=>{
+    if(!conn.open){
+      toast("Timed out – check ID and try again","error");
+      btn.textContent="Connect & Challenge";btn.disabled=false;
+    }
+  },15000);
 }
 
 function handleData(data){
   if(data.type==="handshake"){
+    // Received by HOST from joiner – host picks case and sends start
+    connLog("HOST: received handshake from "+data.name);
     state.oppName=data.name;
-    toast(data.name+" joined! Starting game…","success");
-    setTimeout(()=>startGame(false),1200);
+    toast(data.name+" connected! Starting game…","success");
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Playing vs ${data.name}</div>`;
+    const idx=Math.floor(Math.random()*CASES.length);
+    state.currentCase=CASES[idx];
+    // Send start to joiner, then begin ourselves after a short delay
+    setTimeout(()=>{
+      sendMsg_raw({type:"start",name:state.myName,caseIndex:idx});
+      setTimeout(()=>startGame(false),300);
+    },200);
   }
   else if(data.type==="start"){
+    // Received by JOINER from host
+    connLog("JOINER: received start from host, case #"+(data.caseIndex+1));
     state.oppName=data.name;
     state.currentCase=CASES[data.caseIndex];
-    startGame(true,data.caseIndex);
+    toast("Game starting – Case #"+(data.caseIndex+1),"success");
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Playing vs ${data.name}</div>`;
+    setTimeout(()=>startGame(true,data.caseIndex),300);
   }
   else if(data.type==="telem"){
     state.oppTelem=data.telem;
@@ -636,7 +693,10 @@ function handleData(data){
 }
 
 function sendMsg_raw(obj){
-  if(state.conn&&state.conn.open) state.conn.send(obj);
+  if(state.conn&&state.conn.open){
+    try{state.conn.send(obj);}catch(e){console.warn("send failed:",e);}
+  }
+  // silently drop if not connected (solo mode or conn not open)
 }
 
 function copyMyId(){
@@ -654,12 +714,19 @@ function startSolo(){
 
 // ─── GAME START ──────────────────────────────────────────────────────────────
 function startGame(isReceiver,caseIndex){
-  if(!isReceiver){
+  // Case is already set by handleData or solo init before this is called
+  // isReceiver=true means we are the joiner and already have state.currentCase
+  // isReceiver=false means we are host (or solo) and currentCase is already set
+  if(state.isSolo){
+    // Solo: pick case right here
     const idx=caseIndex!==undefined?caseIndex:Math.floor(Math.random()*CASES.length);
     state.currentCase=CASES[idx];
-    if(!state.isSolo) sendMsg_raw({type:"start",name:state.myName,caseIndex:idx});
   }
-  // Assign random traits to "opponent" for profiling
+  if(!state.currentCase){
+    toast("Error: no case loaded – refresh and try again","error");
+    return;
+  }
+  // Assign random traits to opponent for Cold Read phase
   state.assignedOppTraits=shuffleArr([...TRAITS]).slice(0,2).map(t=>t.id);
   showScreen('game-screen');
   updateHeader();
