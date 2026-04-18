@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cold Read — Detective Duel</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--surface3:#22222e;
+  --border:#2a2a3a;--border2:#3a3a50;
+  --text:#e8e8f0;--text2:#9090a8;--text3:#5a5a70;
+  --gold:#c9a227;--gold2:#e8c347;--gold3:#f5d76e;
+  --red:#c0392b;--red2:#e74c3c;
+  --teal:#1abc9c;--teal2:#2ecc71;
+  --purple:#8e44ad;--purple2:#9b59b6;
+  --blue:#2980b9;--blue2:#3498db;
+  --amber:#e67e22;--amber2:#f39c12;
+  --radius:8px;--radius2:12px;--radius3:16px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;padding:2rem}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* LOBBY */
+#lobby-screen{background:radial-gradient(ellipse at 30% 20%,#1a0a2e 0%,var(--bg) 60%)}
+.game-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:900;text-align:center;line-height:1.1;margin-bottom:.5rem}
+.title-cold{color:var(--gold2)}
+.title-read{color:var(--text)}
+.title-sub{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:3rem;text-align:center}
+.lobby-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius3);padding:2.5rem;width:100%;max-width:440px;display:flex;flex-direction:column;gap:1.5rem}
+.lobby-panel h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold)}
+.input-group{display:flex;flex-direction:column;gap:.5rem}
+.input-group label{font-size:.8rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.input-group input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.95rem;outline:none;transition:border .2s}
+.input-group input:focus{border-color:var(--gold)}
+.btn{padding:.75rem 1.5rem;border-radius:var(--radius);border:none;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.02em}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:var(--gold2)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:var(--red2)}
+.btn-teal{background:var(--teal);color:#000}
+.btn-teal:hover{background:var(--teal2)}
+.divider{border:none;border-top:1px solid var(--border);margin:.5rem 0}
+.peer-id-display{background:var(--surface3);border:1px solid var(--border2);border-radius:var(--radius);padding:.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--gold3);word-break:break-all;cursor:pointer;position:relative}
+.copy-hint{font-size:.7rem;color:var(--text3);margin-top:.3rem}
+.status-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .8rem;border-radius:20px;font-size:.8rem;font-family:'JetBrains Mono',monospace}
+.status-waiting{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);color:var(--gold2)}
+.status-connected{background:rgba(26,188,156,.1);border:1px solid rgba(26,188,156,.3);color:var(--teal)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* GAME SCREEN */
+#game-screen{background:var(--bg);padding:0;align-items:stretch;justify-content:flex-start;min-height:100vh}
+.game-layout{display:grid;grid-template-rows:auto 1fr;height:100vh;width:100%}
+.game-header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.game-header-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);font-weight:700}
+.round-info{display:flex;align-items:center;gap:1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.round-badge{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.3rem .7rem;color:var(--text2)}
+.score-display{display:flex;gap:1rem;align-items:center}
+.score-item{text-align:center}
+.score-name{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.score-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:600;color:var(--gold2)}
+.score-sep{color:var(--border2);font-size:1.2rem}
+.game-body{display:grid;grid-template-columns:1fr 320px;height:calc(100vh - 56px);overflow:hidden}
+.main-panel{overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;-webkit-overflow-scrolling:touch}
+.side-panel{border-left:1px solid var(--border);overflow-y:auto;padding:1.2rem;display:flex;flex-direction:column;gap:1rem;background:var(--surface);-webkit-overflow-scrolling:touch}
+
+/* PHASE INDICATOR */
+.phase-bar{display:flex;gap:.5rem;margin-bottom:.5rem}
+.phase-pip{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .4s}
+.phase-pip.done{background:var(--teal)}
+.phase-pip.active{background:var(--gold2)}
+.phase-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
+
+/* CASE FILE */
+/* FIX: removed overflow:hidden — it was clipping case-body text. Use padding-top instead of pseudo-element to make room for the accent bar */
+.case-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem;padding-top:calc(1.25rem + 3px);position:relative}
+.case-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--amber));border-radius:var(--radius2) var(--radius2) 0 0;z-index:1}
+.case-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold2);margin-bottom:.25rem}
+.case-location{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
+.case-body{font-size:.9rem;line-height:1.7;color:var(--text2)}
+/* FIX 1: was missing colon — margin-top1rem -> margin-top:1rem */
+.clue-list{display:flex;flex-direction:column;gap:.5rem;margin-top:1rem}
+.clue-item{display:flex;gap:.75rem;align-items:flex-start;padding:.6rem;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);font-size:.85rem;color:var(--text)}
+.clue-icon{font-size:1rem;flex-shrink:0;margin-top:.05rem}
+.clue-text{line-height:1.5}
+.noise-tag{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--red2);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);border-radius:4px;padding:.1rem .3rem;margin-left:.4rem}
+
+/* PUZZLE */
+.puzzle-card{background:var(--surface);border:1px solid var(--gold);border-radius:var(--radius2);padding:1.25rem;animation:glow-border 2s ease-in-out infinite}
+@keyframes glow-border{0%,100%{border-color:var(--gold);box-shadow:0 0 8px rgba(201,162,39,.2)}50%{border-color:var(--gold2);box-shadow:0 0 16px rgba(232,195,71,.3)}}
+.puzzle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.puzzle-type{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--amber2);text-transform:uppercase;letter-spacing:.1em}
+.timer-circle{position:relative;width:52px;height:52px}
+.timer-svg{transform:rotate(-90deg)}
+.timer-track{fill:none;stroke:var(--border2);stroke-width:4}
+.timer-fill{fill:none;stroke:var(--gold2);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .1s linear,stroke .5s}
+.timer-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--gold2)}
+.puzzle-question{font-size:.95rem;color:var(--text);margin-bottom:1rem;line-height:1.5}
+.puzzle-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.6rem 1rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;transition:border .2s;text-transform:uppercase}
+.puzzle-input:focus{border-color:var(--gold)}
+.puzzle-options{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem}
+.puzzle-opt{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .75rem;cursor:pointer;font-size:.85rem;color:var(--text);text-align:center;transition:all .2s}
+.puzzle-opt:hover{border-color:var(--gold);color:var(--gold)}
+.puzzle-opt.selected{background:rgba(201,162,39,.1);border-color:var(--gold2);color:var(--gold2)}
+.puzzle-opt.correct{background:rgba(26,188,156,.1);border-color:var(--teal);color:var(--teal)}
+.puzzle-opt.wrong{background:rgba(192,57,43,.1);border-color:var(--red);color:var(--red)}
+/* FIX 1: was margin-bottom.75rem */
+.puzzle-hint{font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.75rem}
+.unlocked-clue{background:rgba(26,188,156,.08);border:1px solid var(--teal);border-radius:var(--radius);padding:.75rem;font-size:.85rem;color:var(--teal2);display:none;animation:fadeIn .5s ease}
+.unlocked-clue.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* PROFILE (EQ) */
+.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem}
+.profile-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--purple2);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.trait-grid{display:flex;flex-direction:column;gap:.5rem}
+.trait-item{display:flex;align-items:center;gap:.75rem;padding:.6rem;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:all .2s}
+.trait-item:hover{border-color:var(--purple2)}
+.trait-item.selected{background:rgba(142,68,173,.1);border-color:var(--purple2)}
+.trait-item.correct-trait{background:rgba(26,188,156,.1);border-color:var(--teal)}
+.trait-item.wrong-trait{background:rgba(192,57,43,.1);border-color:var(--red);opacity:.5}
+.trait-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.trait-item.selected .trait-check,.trait-item.correct-trait .trait-check{background:var(--purple2);border-color:var(--purple2);color:#fff}
+.trait-item.correct-trait .trait-check{background:var(--teal);border-color:var(--teal)}
+.trait-label{font-size:.82rem;color:var(--text);line-height:1.3}
+.trait-sub{font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
+
+/* ACCUSATION */
+.accusation-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
+.suspect-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);padding:.85rem;cursor:pointer;transition:all .2s;text-align:center}
+.suspect-card:hover{border-color:var(--gold)}
+.suspect-card.selected{background:rgba(201,162,39,.08);border-color:var(--gold2)}
+.suspect-card.revealed-correct{background:rgba(26,188,156,.1);border-color:var(--teal);animation:flash-correct .4s ease}
+.suspect-card.revealed-wrong{background:rgba(192,57,43,.08);border-color:var(--red);opacity:.6}
+@keyframes flash-correct{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+.suspect-name{font-weight:500;font-size:.9rem;color:var(--text);margin-bottom:.2rem}
+.suspect-role{font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.motive-select{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+.motive-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.5rem;font-size:.8rem;color:var(--text2);cursor:pointer;transition:all .2s;text-align:center}
+.motive-btn:hover{border-color:var(--amber2);color:var(--amber2)}
+.motive-btn.selected{background:rgba(230,126,34,.1);border-color:var(--amber2);color:var(--amber2)}
+
+/* MIRROR ROOM */
+.mirror-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);display:none}
+.mirror-overlay.show{display:flex}
+.mirror-box{background:var(--surface);border:2px solid var(--purple2);border-radius:var(--radius3);padding:2rem;max-width:520px;width:90%;text-align:center;position:relative}
+.mirror-title{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--purple2);margin-bottom:.5rem}
+.mirror-sub{font-size:.85rem;color:var(--text3);margin-bottom:1.5rem;font-family:'JetBrains Mono',monospace}
+.mirror-countdown{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:600;color:var(--gold2);margin:1rem 0}
+.mirror-hypothesis{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin:1rem 0;font-size:.9rem;color:var(--text2);text-align:left}
+.fake-clue-section{margin-top:1rem}
+.fake-clue-section label{font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.4rem;text-align:left}
+.fake-clue-input{width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:var(--radius);padding:.6rem .9rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;outline:none;transition:border .2s}
+.fake-clue-input:focus{border-color:var(--purple2)}
+.mirror-planted{display:none;background:rgba(142,68,173,.1);border:1px solid var(--purple);border-radius:var(--radius);padding:.6rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--purple2);text-align:left;margin-top:.5rem}
+.mirror-planted.show{display:block}
+
+/* SIDE PANEL */
+.side-section{display:flex;flex-direction:column;gap:.5rem}
+.side-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+/* FIX 1: was gap.5rem -> gap:.5rem etc throughout inline styles */
+.telem-bar{display:flex;align-items:center;gap:.5rem}
+.telem-label{font-size:.75rem;color:var(--text3);width:80px;flex-shrink:0}
+.telem-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.telem-fill{height:100%;border-radius:2px;background:var(--amber);transition:width .5s ease}
+.telem-val{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text2);width:30px;text-align:right;flex-shrink:0}
+.opp-status{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .75rem;font-size:.8rem;color:var(--text2);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:.5rem}
+.activity-log{display:flex;flex-direction:column;gap:.3rem;max-height:120px;overflow-y:auto}
+.log-entry{font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace;padding:.2rem 0;border-bottom:1px solid var(--border);display:flex;gap:.4rem}
+.log-time{color:var(--border2);width:30px;flex-shrink:0}
+.log-text{color:var(--text3)}
+.log-text.you{color:var(--gold3)}
+.log-text.opp{color:var(--purple2)}
+
+/* RESULT SCREEN */
+#result-screen{background:radial-gradient(ellipse at 50% 30%,#1a1000 0%,var(--bg) 60%)}
+.result-box{background:var(--surface);border:2px solid var(--gold);border-radius:var(--radius3);padding:2.5rem;max-width:520px;width:90%;text-align:center}
+.result-title{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;margin-bottom:.5rem}
+.result-win{color:var(--gold2)}
+.result-lose{color:var(--text3)}
+.result-score-big{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:600;color:var(--gold2);margin:1rem 0}
+.result-breakdown{display:flex;flex-direction:column;gap:.5rem;margin:1.5rem 0;text-align:left}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.result-row-label{color:var(--text3);font-size:.82rem}
+.result-row-val{font-family:'JetBrains Mono',monospace;color:var(--gold3)}
+
+/* TOAST */
+.toast-container{position:fixed;top:1rem;right:1rem;display:flex;flex-direction:column;gap:.5rem;z-index:200;pointer-events:none}
+.toast{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:.65rem 1rem;font-size:.82rem;font-family:'JetBrains Mono',monospace;color:var(--text);min-width:220px;animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards}
+.toast.success{border-color:var(--teal);color:var(--teal2)}
+.toast.error{border-color:var(--red2);color:var(--red2)}
+.toast.info{border-color:var(--gold);color:var(--gold2)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0}}
+
+/* LOADING */
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold2);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* CHAT / MSG LOG */
+.msg-log{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:.3rem}
+.msg-item{padding:.35rem .6rem;border-radius:var(--radius);font-size:.78rem;font-family:'JetBrains Mono',monospace}
+.msg-item.you-msg{background:rgba(201,162,39,.08);color:var(--gold3);text-align:right}
+.msg-item.opp-msg{background:var(--surface2);color:var(--text2)}
+.msg-input-row{display:flex;gap:.4rem;margin-top:.3rem}
+.msg-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.4rem .6rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.78rem;outline:none}
+.msg-input:focus{border-color:var(--gold)}
+.msg-send{background:var(--surface3);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius);padding:.4rem .6rem;cursor:pointer;font-size:.75rem;transition:all .2s}
+.msg-send:hover{border-color:var(--gold);color:var(--gold)}
+
+/* PHASE TRANSITIONS */
+.phase-transition{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:150;display:none;animation:phaseIn .4s ease}
+.phase-transition.show{display:flex}
+.phase-announce{text-align:center}
+.phase-announce-number{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}
+.phase-announce-name{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold2)}
+.phase-announce-sub{font-size:.9rem;color:var(--text3);margin-top:.5rem;font-family:'JetBrains Mono',monospace}
+@keyframes phaseIn{from{opacity:0}to{opacity:1}}
+
+/* Responsive */
+@media(max-width:768px){
+  /* On mobile: switch to full-page scroll, no fixed height trapping */
+  #game-screen{overflow-y:auto}
+  .game-layout{height:auto;min-height:100vh;grid-template-rows:auto auto}
+  .game-body{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto;
+    height:auto;
+    overflow:visible;
+  }
+  .main-panel{
+    overflow-y:visible;
+    padding:1rem;
+    padding-bottom:1.5rem;
+    min-height:0;
+    height:auto;
+  }
+  .side-panel{
+    border-left:none;
+    border-top:1px solid var(--border);
+    overflow-y:visible;
+    height:auto;
+    max-height:none;
+  }
+  /* Accusation + motive on mobile: 1 column so cards are full width and always visible */
+  .accusation-grid{grid-template-columns:1fr}
+  .motive-select{grid-template-columns:1fr}
+  .puzzle-options{grid-template-columns:1fr}
+  /* Make header compact on mobile */
+  .game-header{flex-wrap:wrap;gap:.5rem;padding:.5rem 1rem}
+  .round-info{gap:.5rem}
+  .score-val{font-size:.95rem}
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast-container" id="toasts"></div>
+
+<!-- LOBBY -->
+<div class="screen active" id="lobby-screen">
+  <div class="game-title">
+    <span class="title-cold">Cold</span> <span class="title-read">Read</span>
+  </div>
+  <div class="title-sub">Detective Duel · EQ × IQ</div>
+
+  <div class="lobby-panel">
+    <div>
+      <h2>Connect to Opponent</h2>
+      <p style="font-size:.82rem;color:var(--text3);margin-top:.3rem">Share your ID or paste theirs</p>
+    </div>
+
+    <div class="input-group">
+      <label>Your Detective ID</label>
+      <div id="my-peer-id" class="peer-id-display" onclick="copyMyId()">Generating…</div>
+      <div class="copy-hint">Click to copy · Share this with your opponent</div>
+    </div>
+
+    <div id="status-row" style="display:flex;justify-content:center">
+      <div class="status-badge status-waiting">
+        <span class="status-dot"></span> Waiting for connection
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="input-group">
+      <label>Your Name</label>
+      <input type="text" id="my-name" placeholder="Detective Smith" maxlength="20" value="">
+    </div>
+
+    <div class="input-group">
+      <label>Opponent's ID</label>
+      <input type="text" id="opp-id-input" placeholder="Paste opponent peer ID…">
+    </div>
+
+    <button class="btn btn-gold" onclick="connectToPeer()" id="connect-btn">Connect &amp; Challenge</button>
+    <button class="btn btn-outline" onclick="startSolo()">▶ Solo Practice (vs AI)</button>
+  </div>
+</div>
+
+<!-- PHASE TRANSITION OVERLAY -->
+<div class="phase-transition" id="phase-transition">
+  <div class="phase-announce">
+    <div class="phase-announce-number" id="pt-number"></div>
+    <div class="phase-announce-name" id="pt-name"></div>
+    <div class="phase-announce-sub" id="pt-sub"></div>
+  </div>
+</div>
+
+<!-- MIRROR ROOM OVERLAY -->
+<div class="mirror-overlay" id="mirror-overlay">
+  <div class="mirror-box">
+    <div class="mirror-title">⚗ The Mirror Room</div>
+    <div class="mirror-sub">ROUND 5 · PLANT A FAKE CLUE</div>
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:1rem">Your opponent will see your hypothesis board for 10 seconds. Plant one fake clue to mislead them.</p>
+    
+    <div id="mirror-my-hyp" class="mirror-hypothesis"></div>
+
+    <div class="fake-clue-section">
+      <label>Plant a fake clue (visible to opponent)</label>
+      <input type="text" class="fake-clue-input" id="fake-clue-input" placeholder="e.g. Victim's phone showed messages from the butler…" maxlength="80">
+    </div>
+    <div class="mirror-planted" id="mirror-planted-msg"></div>
+
+    <button class="btn btn-gold" style="width:100%;margin-top:1rem" onclick="submitMirrorRoom()">Confirm &amp; Reveal</button>
+    <div style="font-size:.8rem;color:var(--text3);margin-top:.75rem;font-family:'JetBrains Mono',monospace">You will see opponent's board for <span style="color:var(--gold2)" id="mirror-countdown">10</span>s after both submit</div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="game-screen">
+  <div class="game-layout">
+    <!-- HEADER -->
+    <div class="game-header">
+      <div class="game-header-title">Cold Read</div>
+      <div class="round-info">
+        <div class="round-badge">Round <span id="hdr-round">1</span>/10</div>
+        <div class="round-badge" id="hdr-phase-label">Phase 1</div>
+      </div>
+      <div class="score-display">
+        <div class="score-item">
+          <div class="score-name" id="you-name-hdr">You</div>
+          <div class="score-val" id="you-score-hdr">0</div>
+        </div>
+        <div class="score-sep">:</div>
+        <div class="score-item">
+          <div class="score-name" id="opp-name-hdr">Opponent</div>
+          <div class="score-val" id="opp-score-hdr">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="game-body">
+      <!-- MAIN -->
+      <div class="main-panel" id="main-panel">
+        <!-- Injected per phase -->
+      </div>
+
+      <!-- SIDE -->
+      <div class="side-panel">
+        <div class="side-section">
+          <div class="side-label">Behavioral Telemetry</div>
+          <div id="telem-you" style="font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem">YOU</div>
+          <div class="telem-bar" style="margin-bottom:.3rem">
+            <span class="telem-label">Hesitation</span>
+            <div class="telem-track"><div class="telem-fill" id="telem-hes-you" style="width:0%"></div></div>
+            <span class="telem-val" id="telem-hes-you-v">0</span>
+          </div>
+          <div class="telem-bar" style="margin-bottom:.3rem">
+            <span class="telem-label">Corrections</span>
+            <div class="telem-track"><div class="telem-fill" id="telem-cor-you" style="width:0%;background:var(--purple2)"></div></div>
+            <span class="telem-val" id="telem-cor-you-v">0</span>
+          </div>
+          <div class="telem-bar" style="margin-bottom:.75rem">
+            <span class="telem-label">Speed</span>
+            <div class="telem-track"><div class="telem-fill" id="telem-spd-you" style="width:50%;background:var(--teal)"></div></div>
+            <span class="telem-val" id="telem-spd-you-v">-</span>
+          </div>
+          <div id="telem-opp" style="font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem">OPPONENT</div>
+          <div class="telem-bar" style="margin-bottom:.3rem">
+            <span class="telem-label">Hesitation</span>
+            <div class="telem-track"><div class="telem-fill" id="telem-hes-opp" style="width:0%"></div></div>
+            <span class="telem-val" id="telem-hes-opp-v">0</span>
+          </div>
+          <div class="telem-bar" style="margin-bottom:.3rem">
+            <span class="telem-label">Corrections</span>
+            <div class="telem-track"><div class="telem-fill" id="telem-cor-opp" style="width:0%;background:var(--purple2)"></div></div>
+            <span class="telem-val" id="telem-cor-opp-v">0</span>
+          </div>
+          <div class="telem-bar">
+            <span class="telem-label">Speed</span>
+            <div class="telem-track"><div class="telem-fill" id="telem-spd-opp" style="width:50%;background:var(--teal)"></div></div>
+            <span class="telem-val" id="telem-spd-opp-v">-</span>
+          </div>
+        </div>
+
+        <div class="side-section">
+          <div class="side-label">Opponent Status</div>
+          <div class="opp-status" id="opp-status-box">
+            <span class="status-dot" style="color:var(--amber2)"></span>
+            <span id="opp-status-text">Reviewing case file…</span>
+          </div>
+        </div>
+
+        <div class="side-section">
+          <div class="side-label">Activity Log</div>
+          <div class="activity-log" id="activity-log"></div>
+        </div>
+
+        <div class="side-section">
+          <div class="side-label">Secure Channel</div>
+          <div class="msg-log" id="msg-log"></div>
+          <div class="msg-input-row">
+            <input type="text" class="msg-input" id="msg-input" placeholder="Send a message…" maxlength="80" onkeydown="if(event.key==='Enter')sendMsg()">
+            <button class="msg-send" onclick="sendMsg()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="screen" id="result-screen">
+  <div class="result-box">
+    <div class="result-title" id="result-title">Case Closed</div>
+    <div style="font-size:.85rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:.25rem" id="result-subtitle"></div>
+    <div class="result-score-big" id="result-score-big"></div>
+    <div class="result-breakdown" id="result-breakdown"></div>
+    <button class="btn btn-gold" style="width:100%;margin-top:1rem" onclick="location.reload()">New Investigation</button>
+  </div>
+</div>
+
+<script>
+// ─── GAME DATA ───────────────────────────────────────────────────────────────
+const CASES = [
+  {
+    id:1,title:"The Kadri Park Incident",location:"Mangaluru · Kadri Park Area",
+    text:"The victim, a retired professor, was found at 11 PM in their apartment near Kadri Park. The neighbor heard arguing at 9 PM. Security logs show 3 visitors: a delivery driver (8:30 PM), a childhood friend (9:15 PM), and a house cleaner (10:45 PM). The victim's phone shows a deleted call log. The window was forced open—but from the inside.",
+    clues:[
+      {icon:"📦",text:"Delivery driver logged out at 8:52 PM – confirmed via app GPS",noise:false},
+      {icon:"📱",text:"Deleted calls were to a private number registered in Mumbai",noise:false},
+      {icon:"🪟",text:"Window forced from inside – suggests staged break-in",noise:false},
+      {icon:"🌧️",text:"Rain started at 9:30 PM – outdoor footprints washed away",noise:true},
+      {icon:"🧹",text:"Cleaner's keycard shows entry at 10:45 PM, exit never recorded",noise:false},
+      {icon:"📺",text:"TV was still on – neighbours said victim always turned it off at 9",noise:true},
+    ],
+    suspects:[
+      {name:"Priya Nair",role:"Childhood Friend"},
+      {name:"Rajan Shetty",role:"House Cleaner"},
+      {name:"Karim Hussain",role:"Delivery Driver"},
+      {name:"Meena Kamath",role:"Neighbour"}
+    ],
+    killer:"Rajan Shetty",
+    motive:"Greed",
+    puzzle:{type:"Cryptogram",question:"Decode the victim's last note (Caesar +3):\n\"TXLOW BDV KHUH DW WHQL\"",hint:"Shift each letter back 3 places",answer:"GUEST WAS HERE AT TENI",options:["GUEST WAS HERE AT TENI","KILLER LEFT AT NINE","HELP ME CALL POLICE","MONEY GONE FROM SAFE"],correct:0,unlocks:"Victim's note confirms a guest stayed past 10 PM – only the cleaner fits."}
+  },
+  {
+    id:2,title:"The Udupi Hotel Murder",location:"Udupi · Malpe Beach Resort",
+    text:"A businessman was found dead in his hotel room. The do-not-disturb sign was out all morning. His Swiggy order history shows food for two people at 11 PM. His laptop was wiped but the router logs show two devices in the room that night. His business partner was seen in the lobby at 10:40 PM.",
+    clues:[
+      {icon:"🍱",text:"Swiggy order: 2 biryanis, 2 drinks – clearly for two people",noise:false},
+      {icon:"📡",text:"Router logs: 2 devices – victim's phone & an unregistered tablet",noise:false},
+      {icon:"💼",text:"Business partner claims he left at 10:50 PM – lobby camera cuts out at 10:48",noise:false},
+      {icon:"🌊",text:"High tide that night – beach access near hotel was flooded",noise:true},
+      {icon:"💻",text:"Laptop wiped with consumer-grade software – not a professional job",noise:false},
+      {icon:"🔑",text:"Room service record shows second keycard issued at 10:30 PM",noise:false},
+    ],
+    suspects:[
+      {name:"Anand Pai",role:"Business Partner"},
+      {name:"Deepa Rao",role:"Hotel Manager"},
+      {name:"Thomas Mathew",role:"Room Service Staff"},
+      {name:"Sunita Bhat",role:"Wife"}
+    ],
+    killer:"Anand Pai",
+    motive:"Greed",
+    puzzle:{type:"Pattern Lock",question:"Which CCTV blind spot does the killer exploit?\n\nTime: 10:48–11:02 PM\nCamera A: Covers lobby → stairwell\nCamera B: Covers elevator → floor 3\nCamera C: Covers floor 3 → victim's room\n\nLobby camera cut at 10:48. Where did the killer go?",hint:"Think about which path avoids all active cameras",answer:"STAIRWELL TO FLOOR 3",options:["Lobby → Elevator → Floor 3","Stairwell → Floor 3 directly","Service corridor → Roof","Emergency exit → Parking"],correct:1,unlocks:"Killer used the stairwell, avoiding both Camera B and C. Partner's keycard explains room access."}
+  },
+  {
+    id:3,title:"The Lighthouse Disappearance",location:"Mangaluru · Old Port District",
+    text:"A journalist disappeared after publishing a story about port corruption. Her recorder was found at the base of the old lighthouse at midnight. The recording ends mid-sentence with the sound of approaching footsteps. Three port officials had motive. Her editor received a threatening email from an encrypted address 48 hours before.",
+    clues:[
+      {icon:"🎙️",text:"Recording ends at 11:57 PM – footsteps audible, then silence",noise:false},
+      {icon:"📧",text:"Threatening email traced to a café near the port authority office",noise:false},
+      {icon:"⚓",text:"Port official Reddy's badge scanned at the port gate at 11:45 PM",noise:false},
+      {icon:"🌙",text:"Cloudy night – lighthouse beam was operational, poor visibility below",noise:true},
+      {icon:"📋",text:"Journalist's notes mention a 'midnight meeting' with an unnamed source",noise:false},
+      {icon:"🚗",text:"Taxi records show a pickup 200m from lighthouse at 12:15 AM – passenger: unknown",noise:false},
+    ],
+    suspects:[
+      {name:"Venkat Reddy",role:"Port Official"},
+      {name:"Sarah D'Souza",role:"Editor"},
+      {name:"Mohammed Farooq",role:"Dock Supervisor"},
+      {name:"Lila Menon",role:"Corrupt Lawyer"}
+    ],
+    killer:"Venkat Reddy",
+    motive:"Protection",
+    puzzle:{type:"Logic Grid",question:"Cross-reference alibis:\n• Reddy: badge at port gate 11:45 PM (5 min to lighthouse)\n• Farooq: CCTV at fish market until midnight\n• D'Souza: Phone pinged tower 3km away at 11:50 PM\n• Menon: Flight records show she departed Mangaluru at 9 PM\n\nWho had both opportunity AND motive?",hint:"Only one person was physically close to the lighthouse at the right time",answer:"VENKAT REDDY",options:["Venkat Reddy – badge puts him 5 min away","Mohammed Farooq – fish market covers him","Sarah D'Souza – tower ping is alibi","Lila Menon – airport records clear her"],correct:0,unlocks:"Reddy's badge access and proximity to the lighthouse is the only logical match. The taxi picked up a second person."}
+  }
+];
+
+const TRAITS = [
+  {id:"visual",label:"Visual Thinker",sub:"Solves spatial puzzles first",exploit:"They miss audio/text clues"},
+  {id:"cautious",label:"Perfectionist",sub:"Uses full timer every time",exploit:"Rush with false urgency"},
+  {id:"risk",label:"Risk-Taker",sub:"Early aggressive accusations",exploit:"Plant red herrings – they'll bite"},
+  {id:"anxious",label:"Anxious Tracker",sub:"Monitors opponent constantly",exploit:"Fake confidence signals"}
+];
+
+const MOTIVES=["Greed","Revenge","Jealousy","Protection"];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state={
+  peer:null,conn:null,isSolo:false,
+  myName:"Detective",oppName:"Opponent",
+  myScore:0,oppScore:0,
+  round:1,phase:1,
+  currentCase:null,
+  myTelem:{hesitation:0,corrections:0,puzzleTime:0},
+  oppTelem:{hesitation:0,corrections:0,puzzleTime:0},
+  myProfile:[],oppProfile:[],
+  assignedOppTraits:[],
+  selectedTraits:[],
+  selectedSuspect:null,selectedMotive:null,
+  puzzleStartTime:0,puzzleSolved:false,puzzleSubmitted:false,
+  phaseTimer:null,timerInterval:null,
+  mirrorDone:false,mirrorShown:false,
+  fakeClue:"",oppFakeClue:"",
+  roundResults:[],
+  profileBonus:false,
+  myHypothesis:"",
+  puzzleTimeLimit:45,
+  myPuzzleTime:null,oppPuzzleTime:null,
+  bothAccused:false,
+  myAccusation:null,oppAccusation:null,
+  waitingForOpp:false,
+  correctionCount:0,
+  lastClickTime:Date.now(),
+  telemInterval:null
+};
+
+// ─── PEER.JS SETUP ───────────────────────────────────────────────────────────
+function initPeer(){
+  const peer=new Peer(undefined,{debug:0});
+  state.peer=peer;
+  peer.on('open',id=>{
+    document.getElementById('my-peer-id').textContent=id;
+  });
+  peer.on('connection',conn=>{
+    setupConn(conn);
+    toast("Opponent connected!","success");
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Connected</div>`;
+  });
+  peer.on('error',e=>toast("PeerJS: "+e.type,"error"));
+}
+
+function setupConn(conn){
+  state.conn=conn;
+  conn.on('data',handleData);
+  conn.on('close',()=>toast("Connection lost","error"));
+  conn.on('error',e=>toast("Conn error: "+e,"error"));
+}
+
+function connectToPeer(){
+  const id=document.getElementById('opp-id-input').value.trim();
+  const name=document.getElementById('my-name').value.trim()||"Detective";
+  if(!id){toast("Enter opponent ID","error");return}
+  state.myName=name;
+  const conn=state.peer.connect(id);
+  setupConn(conn);
+  conn.on('open',()=>{
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Connected</div>`;
+    toast("Connected! Sending handshake…","info");
+    sendMsg_raw({type:"handshake",name:state.myName});
+  });
+}
+
+function handleData(data){
+  if(data.type==="handshake"){
+    state.oppName=data.name;
+    toast(data.name+" joined! Starting game…","success");
+    setTimeout(()=>startGame(false),1200);
+  }
+  else if(data.type==="start"){
+    state.oppName=data.name;
+    state.currentCase=CASES[data.caseIndex];
+    startGame(true,data.caseIndex);
+  }
+  else if(data.type==="telem"){
+    state.oppTelem=data.telem;
+    updateTelemUI();
+  }
+  else if(data.type==="opp_status"){
+    document.getElementById('opp-status-text').textContent=data.status;
+  }
+  else if(data.type==="puzzle_done"){
+    state.oppPuzzleTime=data.time;
+    addLog(state.oppName+" solved puzzle in "+data.time+"s","opp");
+    updateTelemOppSpeed(data.time);
+    checkBothPuzzleDone();
+  }
+  else if(data.type==="accusation"){
+    state.oppAccusation=data;
+    addLog(state.oppName+" submitted accusation","opp");
+    if(state.myAccusation) resolveRound();
+  }
+  else if(data.type==="mirror_submit"){
+    state.oppFakeClue=data.fakeClue;
+    state.oppHypothesis=data.hypothesis;
+    showOppMirror();
+  }
+  else if(data.type==="profile_submit"){
+    // opponent submitted profile guesses – we reveal ours
+  }
+  else if(data.type==="chat"){
+    addChatMsg(data.text,false);
+  }
+  else if(data.type==="next_round"){
+    advanceRound();
+  }
+}
+
+function sendMsg_raw(obj){
+  if(state.conn&&state.conn.open) state.conn.send(obj);
+}
+
+function copyMyId(){
+  const id=document.getElementById('my-peer-id').textContent;
+  navigator.clipboard.writeText(id).then(()=>toast("ID copied!","success"));
+}
+
+// ─── SOLO MODE ───────────────────────────────────────────────────────────────
+function startSolo(){
+  state.isSolo=true;
+  state.myName=document.getElementById('my-name').value.trim()||"Detective";
+  state.oppName="AI Dali";
+  startGame(false,0);
+}
+
+// ─── GAME START ──────────────────────────────────────────────────────────────
+function startGame(isReceiver,caseIndex){
+  if(!isReceiver){
+    const idx=caseIndex!==undefined?caseIndex:Math.floor(Math.random()*CASES.length);
+    state.currentCase=CASES[idx];
+    if(!state.isSolo) sendMsg_raw({type:"start",name:state.myName,caseIndex:idx});
+  }
+  // Assign random traits to "opponent" for profiling
+  state.assignedOppTraits=shuffleArr([...TRAITS]).slice(0,2).map(t=>t.id);
+  showScreen('game-screen');
+  updateHeader();
+  startTelemetry();
+  showPhaseTransition("Phase 1","The Case File","Study the evidence carefully",()=>renderPhase1());
+}
+
+// ─── PHASES ──────────────────────────────────────────────────────────────────
+function renderPhase1(){
+  state.phase=1;
+  updatePhaseLabel("Case File · Evidence Review");
+  sendStatus("Reviewing case file…");
+  const c=state.currentCase;
+  let cluesHTML=c.clues.map(cl=>`
+    <div class="clue-item">
+      <span class="clue-icon">${cl.icon}</span>
+      <span class="clue-text">${cl.text}${cl.noise?`<span class="noise-tag">NOISE?</span>`:''}</span>
+    </div>`).join('');
+
+  mainPanel(`
+    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+      ${[1,2,3,4].map((p,i)=>`<div class="phase-pip ${i===0?'active':''}" id="pip-${i}"></div>`).join('')}
+    </div>
+    <div class="phase-label">Phase 1 · Evidence Review</div>
+
+    <div class="case-card">
+      <div class="case-title">${c.title}</div>
+      <div class="case-location">📍 ${c.location}</div>
+      <div class="case-body">${c.text}</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem">
+      <div style="font-size:.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.2rem">Evidence Clues · 20% may be noise</div>
+      ${cluesHTML}
+    </div>
+
+    <div style="margin-top:.75rem">
+      <textarea id="my-hyp-input" placeholder="Type your working hypothesis here… (notes are private)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;outline:none;resize:vertical;min-height:80px;line-height:1.6" oninput="state.correctionCount+=0.1;state.myHypothesis=this.value"></textarea>
+    </div>
+
+    <button class="btn btn-gold" style="width:100%;margin-bottom:env(safe-area-inset-bottom,0px)" onclick="proceedToPhase2()">Proceed to Puzzle Gate →</button>
+  `);
+  setPips([0]);
+}
+
+function proceedToPhase2(){
+  state.myHypothesis=document.getElementById('my-hyp-input')?.value||"";
+  if(state.round===5&&!state.mirrorDone){
+    showMirrorRoom();
+    return;
+  }
+  showPhaseTransition("Phase 2","Puzzle Gate","Solve to unlock critical evidence",()=>renderPhase2());
+}
+
+function renderPhase2(){
+  state.phase=2;
+  updatePhaseLabel("Puzzle Gate");
+  sendStatus("Solving puzzle…");
+  state.puzzleStartTime=Date.now();
+  state.puzzleSolved=false;
+  state.puzzleSubmitted=false;
+  state.myPuzzleTime=null;
+  const p=state.currentCase.puzzle;
+  let optHTML=p.options.map((o,i)=>`<div class="puzzle-opt" onclick="selectPuzzleOpt(${i})" id="popt-${i}">${o}</div>`).join('');
+  
+  mainPanel(`
+    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+      ${[0,1,2,3].map((i)=>`<div class="phase-pip ${i<1?'done':i===1?'active':''}" id="pip-${i}"></div>`).join('')}
+    </div>
+    <div class="phase-label">Phase 2 · Puzzle Gate · ${p.type}</div>
+
+    <div class="puzzle-card">
+      <div class="puzzle-header">
+        <div class="puzzle-type">${p.type}</div>
+        <div class="timer-circle">
+          <svg class="timer-svg" width="52" height="52" viewBox="0 0 52 52">
+            <circle class="timer-track" cx="26" cy="26" r="20"/>
+            <circle class="timer-fill" id="timer-fill" cx="26" cy="26" r="20" stroke-dasharray="125.66" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-text" id="timer-text">${state.puzzleTimeLimit}</div>
+        </div>
+      </div>
+      <div class="puzzle-question" style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:.82rem">${p.question}</div>
+      <div class="puzzle-hint" style="margin:.5rem 0;color:var(--amber2)">Hint: ${p.hint}</div>
+      <div class="puzzle-options">${optHTML}</div>
+      <button class="btn btn-gold" style="width:100%;margin-top:.25rem" id="puzzle-submit-btn" onclick="submitPuzzle()" disabled>Submit Answer</button>
+    </div>
+
+    <div class="unlocked-clue" id="unlocked-clue">
+      <strong style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:.1em">🔓 Evidence Unlocked</strong>
+      <div style="margin-top:.4rem" id="unlocked-text"></div>
+    </div>
+  `);
+  setPips([0,1]);
+  startPuzzleTimer();
+}
+
+let selectedPuzzleOpt=null;
+function selectPuzzleOpt(i){
+  if(state.puzzleSolved||state.puzzleSubmitted) return;
+  selectedPuzzleOpt=i;
+  document.querySelectorAll('.puzzle-opt').forEach((el,j)=>el.classList.toggle('selected',j===i));
+  document.getElementById('puzzle-submit-btn').disabled=false;
+  state.myTelem.hesitation=Math.round((Date.now()-state.lastClickTime)/100)/10;
+  state.lastClickTime=Date.now();
+}
+
+function submitPuzzle(){
+  if(state.puzzleSubmitted) return;
+  if(selectedPuzzleOpt===null){toast("Select an answer","error");return}
+  state.puzzleSubmitted=true;
+  clearInterval(state.timerInterval);
+  const elapsed=Math.round((Date.now()-state.puzzleStartTime)/1000);
+  state.myPuzzleTime=elapsed;
+  addLog("You solved puzzle in "+elapsed+"s","you");
+  sendMsg_raw({type:"puzzle_done",time:elapsed});
+  updateTelemYouSpeed(elapsed);
+
+  const p=state.currentCase.puzzle;
+  if(selectedPuzzleOpt===p.correct){
+    state.puzzleSolved=true;
+    document.getElementById('popt-'+selectedPuzzleOpt).classList.add('correct');
+    const uc=document.getElementById('unlocked-clue');
+    document.getElementById('unlocked-text').textContent=p.unlocks;
+    uc.classList.add('show');
+    toast("Puzzle solved! Evidence unlocked","success");
+  } else {
+    document.getElementById('popt-'+selectedPuzzleOpt).classList.add('wrong');
+    document.getElementById('popt-'+p.correct).classList.add('correct');
+    toast("Wrong – but you may still proceed","error");
+  }
+  setTimeout(()=>{
+    checkBothPuzzleDone();
+  },1500);
+}
+
+function checkBothPuzzleDone(){
+  if(state.isSolo){
+    // Solo: simulate AI time if not already set
+    if(!state.oppPuzzleTime){
+      state.oppPuzzleTime=Math.floor(Math.random()*20)+10;
+      updateTelemOppSpeed(state.oppPuzzleTime);
+    }
+  }
+  if(state.myPuzzleTime!==null&&(state.oppPuzzleTime!==null||state.isSolo)){
+    setTimeout(()=>showPhaseTransition("Phase 3","Cold Read","Profile your opponent's psychology",()=>renderPhase3()),800);
+  } else {
+    updateOppStatus("Waiting for "+state.oppName+" to solve…");
+    document.getElementById('opp-status-text').textContent="Solving puzzle…";
+  }
+}
+
+function startPuzzleTimer(){
+  let remaining=state.puzzleTimeLimit;
+  const circumference=125.66;
+  state.timerInterval=setInterval(()=>{
+    remaining--;
+    const fill=document.getElementById('timer-fill');
+    const txt=document.getElementById('timer-text');
+    if(!fill){clearInterval(state.timerInterval);return}
+    const offset=circumference*(1-remaining/state.puzzleTimeLimit);
+    fill.style.strokeDashoffset=offset;
+    txt.textContent=remaining;
+    if(remaining<=10) fill.style.stroke='var(--red2)';
+    if(remaining<=0){
+      clearInterval(state.timerInterval);
+      // FIX 2: always auto-submit when timer expires, regardless of selection
+      autoSubmitPuzzle();
+    }
+  },1000);
+}
+
+// FIX 2: autoSubmitPuzzle now always advances — it marks time, reveals correct answer,
+// then forces checkBothPuzzleDone so the flow never gets stuck after timeout.
+function autoSubmitPuzzle(){
+  if(state.puzzleSubmitted) return;
+  state.puzzleSubmitted=true;
+  clearInterval(state.timerInterval);
+
+  const elapsed=state.puzzleTimeLimit;
+  state.myPuzzleTime=elapsed;
+  addLog("Time expired – auto-submitted","you");
+  sendMsg_raw({type:"puzzle_done",time:elapsed});
+  updateTelemYouSpeed(elapsed);
+
+  // Reveal the correct answer visually so player isn't left confused
+  const p=state.currentCase.puzzle;
+  const correctEl=document.getElementById('popt-'+p.correct);
+  if(correctEl) correctEl.classList.add('correct');
+  if(selectedPuzzleOpt!==null&&selectedPuzzleOpt!==p.correct){
+    const wrongEl=document.getElementById('popt-'+selectedPuzzleOpt);
+    if(wrongEl) wrongEl.classList.add('wrong');
+  }
+
+  // Disable submit button
+  const btn=document.getElementById('puzzle-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Time\'s Up';}
+
+  toast("Time's up! Moving on…","error");
+
+  // Force advance after a brief pause so player sees the reveal
+  setTimeout(()=>checkBothPuzzleDone(),1500);
+}
+
+function renderPhase3(){
+  state.phase=3;
+  updatePhaseLabel("Cold Read · Profiling");
+  sendStatus("Profiling opponent…");
+  let traitHTML=TRAITS.map(t=>`
+    <div class="trait-item" id="trait-${t.id}" onclick="toggleTrait('${t.id}')">
+      <div class="trait-check" id="tcheck-${t.id}"></div>
+      <div>
+        <div class="trait-label">${t.label}</div>
+        <div class="trait-sub">${t.sub} · Exploit: ${t.exploit}</div>
+      </div>
+    </div>`).join('');
+
+  mainPanel(`
+    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+      ${[0,1,2,3].map((i)=>`<div class="phase-pip ${i<2?'done':i===2?'active':''}" id="pip-${i}"></div>`).join('')}
+    </div>
+    <div class="phase-label">Phase 3 · Cold Read</div>
+
+    <div class="profile-card">
+      <div class="profile-title">🧠 Opponent Psychological Profile</div>
+      <p style="font-size:.82rem;color:var(--text3);margin-bottom:1rem;font-family:'JetBrains Mono',monospace">Based on behavioral telemetry, select 2 traits you believe describe <strong style="color:var(--text)">${state.oppName}</strong>:</p>
+      <div class="trait-grid" id="trait-grid">${traitHTML}</div>
+      <div style="margin-top:.75rem;font-size:.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace" id="trait-count-hint">Select exactly 2 traits</div>
+    </div>
+
+    <button class="btn btn-gold" style="width:100%" onclick="submitProfile()">Submit Profile Read →</button>
+  `);
+  setPips([0,1,2]);
+  state.selectedTraits=[];
+}
+
+function toggleTrait(id){
+  const idx=state.selectedTraits.indexOf(id);
+  if(idx>=0){
+    state.selectedTraits.splice(idx,1);
+    document.getElementById('trait-'+id).classList.remove('selected');
+    document.getElementById('tcheck-'+id).textContent='';
+  } else {
+    if(state.selectedTraits.length>=2){toast("Select only 2 traits","error");return}
+    state.selectedTraits.push(id);
+    document.getElementById('trait-'+id).classList.add('selected');
+    document.getElementById('tcheck-'+id).textContent='✓';
+  }
+  document.getElementById('trait-count-hint').textContent=state.selectedTraits.length+"/2 selected";
+}
+
+function submitProfile(){
+  if(state.selectedTraits.length!==2){toast("Select exactly 2 traits","error");return}
+  // Check correctness
+  const correct=state.selectedTraits.filter(t=>state.assignedOppTraits.includes(t));
+  const bonus=correct.length>=2;
+  state.profileBonus=bonus;
+  // Reveal results
+  state.selectedTraits.forEach(id=>{
+    const el=document.getElementById('trait-'+id);
+    if(state.assignedOppTraits.includes(id)){
+      el.classList.remove('selected'); el.classList.add('correct-trait');
+      document.getElementById('tcheck-'+id).textContent='✓';
+    } else {
+      el.classList.remove('selected'); el.classList.add('wrong-trait');
+      document.getElementById('tcheck-'+id).textContent='✗';
+    }
+  });
+  // Show all correct traits
+  state.assignedOppTraits.forEach(id=>{
+    const el=document.getElementById('trait-'+id);
+    if(!el) return;
+    if(!el.classList.contains('correct-trait')) el.style.border='1px dashed var(--teal)';
+  });
+  if(bonus){
+    toast("🎯 Profile Bonus! You read "+state.oppName+" correctly. Peeking hypothesis…","success");
+    addLog("Profile bonus! Correct cold read","you");
+    setTimeout(()=>{
+      showPhaseTransition("Phase 4","The Accusation","Name the killer and their motive",()=>renderPhase4(true));
+    },2000);
+  } else {
+    const msg=correct.length===1?"1 trait correct – no bonus. Proceeding…":"Both wrong. Proceeding…";
+    toast(msg,"info");
+    setTimeout(()=>{
+      showPhaseTransition("Phase 4","The Accusation","Name the killer and their motive",()=>renderPhase4(false));
+    },2000);
+  }
+  sendMsg_raw({type:"profile_submit",traits:state.selectedTraits});
+}
+
+function renderPhase4(hasBonus){
+  state.phase=4;
+  updatePhaseLabel("Accusation");
+  sendStatus("Making accusation…");
+  const c=state.currentCase;
+  let suspHTML=c.suspects.map((s,i)=>`
+    <div class="suspect-card" id="susp-${i}" onclick="selectSuspect(${i})">
+      <div class="suspect-name">${s.name}</div>
+      <div class="suspect-role">${s.role}</div>
+    </div>`).join('');
+  let motHTML=MOTIVES.map((m,i)=>`
+    <div class="motive-btn" id="mot-${i}" onclick="selectMotive(${i})">${m}</div>`).join('');
+
+  let bonusNote=hasBonus?`<div style="background:rgba(26,188,156,.08);border:1px solid var(--teal);border-radius:var(--radius);padding:.6rem .75rem;font-size:.8rem;color:var(--teal2);margin-bottom:1rem;font-family:'JetBrains Mono',monospace">🎁 Profile Bonus: ${state.oppName}'s current hypothesis — <em style="color:var(--text)">"${state.oppHypothesis||state.myHypothesis||'Unknown suspect, unclear motive'}"</em></div>`:'';
+
+  mainPanel(`
+    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+      ${[0,1,2,3].map((i)=>`<div class="phase-pip done" id="pip-${i}"></div>`).join('')}
+    </div>
+    <div class="phase-label">Phase 4 · The Accusation</div>
+    ${bonusNote}
+    <div class="case-card" style="padding:1rem">
+      <div class="case-title" style="font-size:1rem;margin-bottom:.75rem">Who is the killer?</div>
+      <div class="accusation-grid">${suspHTML}</div>
+    </div>
+    <div class="case-card" style="padding:1rem">
+      <div class="case-title" style="font-size:1rem;margin-bottom:.75rem">What was their motive?</div>
+      <div class="motive-select">${motHTML}</div>
+    </div>
+    <button class="btn btn-gold" style="width:100%" onclick="submitAccusation()" id="accuse-btn">Accuse Now →</button>
+    <div id="waiting-opp-msg" style="display:none;text-align:center;color:var(--text3);font-size:.8rem;font-family:'JetBrains Mono',monospace;margin-top:.5rem">Waiting for ${state.oppName}…</div>
+  `);
+  setPips([0,1,2,3]);
+}
+
+let selectedSuspectIdx=null,selectedMotiveIdx=null;
+function selectSuspect(i){
+  selectedSuspectIdx=i;
+  document.querySelectorAll('.suspect-card').forEach((el,j)=>el.classList.toggle('selected',j===i));
+}
+function selectMotive(i){
+  selectedMotiveIdx=i;
+  document.querySelectorAll('.motive-btn').forEach((el,j)=>el.classList.toggle('selected',j===i));
+}
+function submitAccusation(){
+  if(selectedSuspectIdx===null){toast("Choose a suspect","error");return}
+  if(selectedMotiveIdx===null){toast("Choose a motive","error");return}
+  const c=state.currentCase;
+  state.myAccusation={
+    suspect:c.suspects[selectedSuspectIdx].name,
+    motive:MOTIVES[selectedMotiveIdx],
+    profileBonus:state.profileBonus
+  };
+  document.getElementById('accuse-btn').disabled=true;
+  document.getElementById('waiting-opp-msg').style.display='block';
+  sendMsg_raw({type:"accusation",suspect:state.myAccusation.suspect,motive:state.myAccusation.motive,profileBonus:state.profileBonus});
+  addLog("You accused: "+state.myAccusation.suspect,"you");
+  if(state.isSolo) simulateOppAccusation();
+  else if(state.oppAccusation) resolveRound();
+}
+
+function simulateOppAccusation(){
+  const c=state.currentCase;
+  const suspects=c.suspects.map(s=>s.name);
+  const isCorrect=Math.random()>0.4;
+  state.oppAccusation={
+    suspect:isCorrect?c.killer:suspects.find(s=>s!==c.killer),
+    motive:isCorrect?c.motive:MOTIVES[Math.floor(Math.random()*4)]
+  };
+  setTimeout(()=>resolveRound(),500);
+}
+
+function resolveRound(){
+  const c=state.currentCase;
+  const myCorrectSuspect=state.myAccusation.suspect===c.killer;
+  const myCorrectMotive=state.myAccusation.motive===c.motive;
+  const oppCorrectSuspect=state.oppAccusation&&state.oppAccusation.suspect===c.killer;
+  const oppCorrectMotive=state.oppAccusation&&state.oppAccusation.motive===c.motive;
+
+  let myPts=0,oppPts=0;
+  const breakdown=[];
+
+  if(myCorrectSuspect){myPts+=50;breakdown.push({label:"Correct suspect",val:"+50 pts",you:true})}
+  if(myCorrectMotive){myPts+=30;breakdown.push({label:"Correct motive",val:"+30 pts",you:true})}
+  if(state.profileBonus){myPts+=25;breakdown.push({label:"Cold Read bonus",val:"+25 pts",you:true})}
+  if(state.myPuzzleTime&&state.oppPuzzleTime&&state.myPuzzleTime<state.oppPuzzleTime){myPts+=10;breakdown.push({label:"Faster puzzle solve",val:"+10 pts",you:true})}
+
+  if(oppCorrectSuspect){oppPts+=50;breakdown.push({label:"Opp correct suspect",val:"+50 pts",you:false})}
+  if(oppCorrectMotive){oppPts+=30;breakdown.push({label:"Opp correct motive",val:"+30 pts",you:false})}
+
+  state.myScore+=myPts;
+  state.oppScore+=oppPts;
+  updateHeader();
+
+  const c2=c;
+  const revealHTML=c2.suspects.map(s=>`
+    <div class="suspect-card ${s.name===c2.killer?'revealed-correct':'revealed-wrong'}" style="cursor:default">
+      <div class="suspect-name">${s.name}${s.name===c2.killer?` <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--teal)">✓ KILLER</span>`:''}</div>
+      <div class="suspect-role">${s.role}</div>
+    </div>`).join('');
+
+  mainPanel(`
+    <div class="case-card">
+      <div class="case-title" style="color:var(--teal2);font-size:1.1rem">Round ${state.round} Resolved</div>
+      <div class="case-location">Killer: ${c2.killer} · Motive: ${c2.motive}</div>
+    </div>
+    <div class="accusation-grid">${revealHTML}</div>
+    <div style="display:flex;flex-direction:column;gap:.4rem">
+      ${breakdown.map(b=>`
+        <div style="display:flex;justify-content:space-between;padding:.4rem;background:${b.you?'rgba(201,162,39,.05)':'rgba(142,68,173,.05)'};border:1px solid ${b.you?'rgba(201,162,39,.2)':'rgba(142,68,173,.2)'};border-radius:var(--radius);font-size:.82rem">
+          <span style="color:var(--text3)">${b.you?'YOU':'OPP'} · ${b.label}</span>
+          <span style="font-family:'JetBrains Mono',monospace;color:${b.you?'var(--gold2)':'var(--purple2)'}">${b.val}</span>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:1rem;margin-top:.5rem">
+      <div style="flex:1;background:var(--surface2);border-radius:var(--radius);padding:.75rem;text-align:center">
+        <div style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace">YOU gained</div>
+        <div style="font-size:1.5rem;font-family:'JetBrains Mono',monospace;color:var(--gold2)">+${myPts}</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:var(--radius);padding:.75rem;text-align:center">
+        <div style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace">OPP gained</div>
+        <div style="font-size:1.5rem;font-family:'JetBrains Mono',monospace;color:var(--purple2)">+${oppPts}</div>
+      </div>
+    </div>
+    <button class="btn btn-gold" style="width:100%" onclick="nextRound()">
+      ${state.round>=3?'End Investigation →':'Next Round →'}
+    </button>
+  `);
+
+  state.myAccusation=null;state.oppAccusation=null;
+  state.myPuzzleTime=null;state.oppPuzzleTime=null;
+  state.profileBonus=false;selectedSuspectIdx=null;selectedMotiveIdx=null;
+  selectedPuzzleOpt=null;
+}
+
+function nextRound(){
+  sendMsg_raw({type:"next_round"});
+  advanceRound();
+}
+function advanceRound(){
+  if(state.round>=3||state.myScore>=200||state.oppScore>=200){
+    endGame();
+    return;
+  }
+  state.round++;
+  state.currentCase=CASES[(state.round-1)%CASES.length];
+  state.mirrorDone=false;
+  updateHeader();
+  showPhaseTransition("Round "+state.round,"New Case","Fresh evidence, fresh suspects",()=>renderPhase1());
+}
+
+// ─── MIRROR ROOM ──────────────────────────────────────────────────────────────
+function showMirrorRoom(){
+  const hyp=document.getElementById('my-hyp-input')?.value||state.myHypothesis||"No hypothesis recorded yet.";
+  state.myHypothesis=hyp;
+  document.getElementById('mirror-my-hyp').textContent="Your hypothesis: "+hyp;
+  document.getElementById('mirror-overlay').classList.add('show');
+}
+
+function submitMirrorRoom(){
+  const fake=document.getElementById('fake-clue-input').value.trim();
+  state.fakeClue=fake||"No fake clue planted";
+  document.getElementById('mirror-planted-msg').textContent="Planted: "+state.fakeClue;
+  document.getElementById('mirror-planted-msg').classList.add('show');
+  sendMsg_raw({type:"mirror_submit",fakeClue:state.fakeClue,hypothesis:state.myHypothesis});
+  if(state.isSolo){
+    state.oppFakeClue="The victim knew the delivery driver personally.";
+    state.oppHypothesis="I suspect the cleaner—they never swiped out.";
+    setTimeout(()=>showOppMirror(),500);
+  }
+}
+
+function showOppMirror(){
+  let countdown=10;
+  document.getElementById('mirror-countdown').textContent=countdown;
+  document.getElementById('mirror-my-hyp').innerHTML=
+    `<strong style="color:var(--purple2);font-family:'JetBrains Mono',monospace;font-size:.75rem">OPPONENT'S BOARD (${state.oppName})</strong><br>`+
+    `<div style="margin-top:.4rem">${state.oppHypothesis||"No hypothesis yet"}</div>`+
+    (state.oppFakeClue?`<div style="margin-top:.4rem;color:var(--red2);font-size:.8rem">🔴 New clue: ${state.oppFakeClue}</div>`:'');
+  document.querySelector('.fake-clue-section').style.display='none';
+  document.querySelector('.mirror-box .btn').style.display='none';
+  
+  const ci=setInterval(()=>{
+    countdown--;
+    const el=document.getElementById('mirror-countdown');
+    if(el) el.textContent=countdown;
+    if(countdown<=0){
+      clearInterval(ci);
+      document.getElementById('mirror-overlay').classList.remove('show');
+      state.mirrorDone=true;
+      toast("Mirror Room closed. Can you spot the fake clue?","info");
+      showPhaseTransition("Phase 2","Puzzle Gate","Solve to unlock critical evidence",()=>renderPhase2());
+    }
+  },1000);
+}
+
+// ─── TELEMETRY ────────────────────────────────────────────────────────────────
+function startTelemetry(){
+  state.telemInterval=setInterval(()=>{
+    state.myTelem.corrections=Math.min(100,state.correctionCount);
+    sendMsg_raw({type:"telem",telem:state.myTelem});
+    if(state.isSolo) simulateOppTelem();
+    updateTelemUI();
+  },3000);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Backspace') state.correctionCount++;
+  });
+}
+
+function simulateOppTelem(){
+  state.oppTelem={
+    hesitation:Math.random()*5,
+    corrections:Math.random()*8,
+    puzzleTime:state.oppTelem.puzzleTime||Math.random()*30
+  };
+}
+
+function updateTelemUI(){
+  const my=state.myTelem,op=state.oppTelem;
+  setTelem('you',my);setTelem('opp',op);
+}
+function setTelem(who,t){
+  const s=who==='you'?'you':'opp';
+  const hesEl=document.getElementById('telem-hes-'+s);
+  const corEl=document.getElementById('telem-cor-'+s);
+  if(!hesEl) return;
+  const hesVal=Math.min(100,t.hesitation*20);
+  const corVal=Math.min(100,t.corrections*10);
+  hesEl.style.width=hesVal+'%';
+  corEl.style.width=corVal+'%';
+  document.getElementById('telem-hes-'+s+'-v').textContent=t.hesitation?t.hesitation.toFixed(1):'0';
+  document.getElementById('telem-cor-'+s+'-v').textContent=Math.round(t.corrections)||0;
+}
+function updateTelemYouSpeed(t){
+  const pct=Math.max(0,100-t*2);
+  document.getElementById('telem-spd-you').style.width=pct+'%';
+  document.getElementById('telem-spd-you-v').textContent=t+'s';
+}
+function updateTelemOppSpeed(t){
+  const pct=Math.max(0,100-t*2);
+  const el=document.getElementById('telem-spd-opp');
+  if(el){el.style.width=pct+'%';}
+  const vel=document.getElementById('telem-spd-opp-v');
+  if(vel) vel.textContent=t+'s';
+}
+
+// ─── MESSAGING ────────────────────────────────────────────────────────────────
+function sendMsg(){
+  const input=document.getElementById('msg-input');
+  if(!input) return;
+  const txt=input.value.trim();
+  if(!txt) return;
+  input.value='';
+  addChatMsg(txt,true);
+  sendMsg_raw({type:"chat",text:txt});
+}
+function addChatMsg(txt,isMe){
+  const log=document.getElementById('msg-log');
+  if(!log) return;
+  const div=document.createElement('div');
+  div.className='msg-item '+(isMe?'you-msg':'opp-msg');
+  div.textContent=(isMe?'You':state.oppName)+': '+txt;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
+}
+
+function addLog(text,who){
+  const log=document.getElementById('activity-log');
+  if(!log) return;
+  const div=document.createElement('div');
+  div.className='log-entry';
+  const now=new Date();
+  const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  div.innerHTML=`<span class="log-time">${t}</span><span class="log-text ${who}">${text}</span>`;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
+}
+
+function sendStatus(s){
+  sendMsg_raw({type:"opp_status",status:s});
+}
+
+// ─── UI HELPERS ──────────────────────────────────────────────────────────────
+function mainPanel(html){
+  document.getElementById('main-panel').innerHTML=html;
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function updateHeader(){
+  document.getElementById('hdr-round').textContent=state.round;
+  document.getElementById('you-score-hdr').textContent=state.myScore;
+  document.getElementById('opp-score-hdr').textContent=state.oppScore;
+  document.getElementById('you-name-hdr').textContent=state.myName;
+  document.getElementById('opp-name-hdr').textContent=state.oppName;
+}
+function updatePhaseLabel(label){
+  document.getElementById('hdr-phase-label').textContent=label;
+}
+function updateOppStatus(s){
+  const el=document.getElementById('opp-status-text');
+  if(el) el.textContent=s;
+}
+function setPips(donePips){
+  [0,1,2,3].forEach(i=>{
+    const el=document.getElementById('pip-'+i);
+    if(!el) return;
+    el.className='phase-pip'+(donePips.includes(i)?' done':'');
+  });
+}
+function showPhaseTransition(number,name,sub,cb){
+  const ov=document.getElementById('phase-transition');
+  document.getElementById('pt-number').textContent=number;
+  document.getElementById('pt-name').textContent=name;
+  document.getElementById('pt-sub').textContent=sub;
+  ov.classList.add('show');
+  setTimeout(()=>{ov.classList.remove('show');if(cb)cb();},2000);
+}
+function toast(msg,type='info'){
+  const c=document.getElementById('toasts');
+  const d=document.createElement('div');
+  d.className='toast '+type;
+  d.textContent=msg;
+  c.appendChild(d);
+  setTimeout(()=>d.remove(),3200);
+}
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+// ─── END GAME ─────────────────────────────────────────────────────────────────
+function endGame(){
+  clearInterval(state.telemInterval);
+  clearInterval(state.timerInterval);
+  showScreen('result-screen');
+  const won=state.myScore>state.oppScore;
+  const tied=state.myScore===state.oppScore;
+  document.getElementById('result-title').textContent=tied?"A Draw!":won?"Case Closed":"Case Unsolved";
+  document.getElementById('result-title').className='result-title '+(won?'result-win':'result-lose');
+  document.getElementById('result-subtitle').textContent=won?`${state.myName} wins over ${state.oppName}`:`${state.oppName} outread ${state.myName}`;
+  document.getElementById('result-score-big').textContent=state.myScore+" : "+state.oppScore;
+  document.getElementById('result-breakdown').innerHTML=`
+    <div class="result-row"><span class="result-row-label">Rounds played</span><span class="result-row-val">${state.round}</span></div>
+    <div class="result-row"><span class="result-row-label">Your score</span><span class="result-row-val">${state.myScore} pts</span></div>
+    <div class="result-row"><span class="result-row-label">${state.oppName}'s score</span><span class="result-row-val">${state.oppScore} pts</span></div>
+  `;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+initPeer();
+</script>
+</body>
+</html>
