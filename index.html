@@ -22,11 +22,9 @@
 }
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
 
-/* SCREENS */
 .screen{display:none;min-height:100vh;padding:2rem}
 .screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center}
 
-/* LOBBY */
 #lobby-screen{background:radial-gradient(ellipse at 30% 20%,#1a0a2e 0%,var(--bg) 60%)}
 .game-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:900;text-align:center;line-height:1.1;margin-bottom:.5rem}
 .title-cold{color:var(--gold2)}
@@ -56,7 +54,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* GAME SCREEN */
 #game-screen{background:var(--bg);padding:0;align-items:stretch;justify-content:flex-start;min-height:100vh}
 .game-layout{display:grid;grid-template-rows:auto 1fr;height:100vh;width:100%}
 .game-header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
@@ -72,28 +69,23 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .main-panel{overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;-webkit-overflow-scrolling:touch}
 .side-panel{border-left:1px solid var(--border);overflow-y:auto;padding:1.2rem;display:flex;flex-direction:column;gap:1rem;background:var(--surface);-webkit-overflow-scrolling:touch}
 
-/* PHASE INDICATOR */
 .phase-bar{display:flex;gap:.5rem;margin-bottom:.5rem}
 .phase-pip{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .4s}
 .phase-pip.done{background:var(--teal)}
 .phase-pip.active{background:var(--gold2)}
 .phase-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
 
-/* CASE FILE */
-/* FIX: removed overflow:hidden — it was clipping case-body text. Use padding-top instead of pseudo-element to make room for the accent bar */
 .case-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem;padding-top:calc(1.25rem + 3px);position:relative}
 .case-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--amber));border-radius:var(--radius2) var(--radius2) 0 0;z-index:1}
 .case-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold2);margin-bottom:.25rem}
 .case-location{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
 .case-body{font-size:.9rem;line-height:1.7;color:var(--text2)}
-/* FIX 1: was missing colon — margin-top1rem -> margin-top:1rem */
 .clue-list{display:flex;flex-direction:column;gap:.5rem;margin-top:1rem}
 .clue-item{display:flex;gap:.75rem;align-items:flex-start;padding:.6rem;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);font-size:.85rem;color:var(--text)}
 .clue-icon{font-size:1rem;flex-shrink:0;margin-top:.05rem}
 .clue-text{line-height:1.5}
 .noise-tag{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--red2);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);border-radius:4px;padding:.1rem .3rem;margin-left:.4rem}
 
-/* PUZZLE */
 .puzzle-card{background:var(--surface);border:1px solid var(--gold);border-radius:var(--radius2);padding:1.25rem;animation:glow-border 2s ease-in-out infinite}
 @keyframes glow-border{0%,100%{border-color:var(--gold);box-shadow:0 0 8px rgba(201,162,39,.2)}50%{border-color:var(--gold2);box-shadow:0 0 16px rgba(232,195,71,.3)}}
 .puzzle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
@@ -112,13 +104,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .puzzle-opt.selected{background:rgba(201,162,39,.1);border-color:var(--gold2);color:var(--gold2)}
 .puzzle-opt.correct{background:rgba(26,188,156,.1);border-color:var(--teal);color:var(--teal)}
 .puzzle-opt.wrong{background:rgba(192,57,43,.1);border-color:var(--red);color:var(--red)}
-/* FIX 1: was margin-bottom.75rem */
 .puzzle-hint{font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.75rem}
 .unlocked-clue{background:rgba(26,188,156,.08);border:1px solid var(--teal);border-radius:var(--radius);padding:.75rem;font-size:.85rem;color:var(--teal2);display:none;animation:fadeIn .5s ease}
 .unlocked-clue.show{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 
-/* PROFILE (EQ) */
 .profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem}
 .profile-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--purple2);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
 .trait-grid{display:flex;flex-direction:column;gap:.5rem}
@@ -133,7 +123,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .trait-label{font-size:.82rem;color:var(--text);line-height:1.3}
 .trait-sub{font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
 
-/* ACCUSATION */
 .accusation-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
 .suspect-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);padding:.85rem;cursor:pointer;transition:all .2s;text-align:center}
 .suspect-card:hover{border-color:var(--gold)}
@@ -148,7 +137,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .motive-btn:hover{border-color:var(--amber2);color:var(--amber2)}
 .motive-btn.selected{background:rgba(230,126,34,.1);border-color:var(--amber2);color:var(--amber2)}
 
-/* MIRROR ROOM */
 .mirror-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);display:none}
 .mirror-overlay.show{display:flex}
 .mirror-box{background:var(--surface);border:2px solid var(--purple2);border-radius:var(--radius3);padding:2rem;max-width:520px;width:90%;text-align:center;position:relative}
@@ -163,10 +151,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .mirror-planted{display:none;background:rgba(142,68,173,.1);border:1px solid var(--purple);border-radius:var(--radius);padding:.6rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--purple2);text-align:left;margin-top:.5rem}
 .mirror-planted.show{display:block}
 
-/* SIDE PANEL */
 .side-section{display:flex;flex-direction:column;gap:.5rem}
 .side-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;border-bottom:1px solid var(--border);padding-bottom:.4rem}
-/* FIX 1: was gap.5rem -> gap:.5rem etc throughout inline styles */
 .telem-bar{display:flex;align-items:center;gap:.5rem}
 .telem-label{font-size:.75rem;color:var(--text3);width:80px;flex-shrink:0}
 .telem-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
@@ -180,7 +166,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .log-text.you{color:var(--gold3)}
 .log-text.opp{color:var(--purple2)}
 
-/* RESULT SCREEN */
 #result-screen{background:radial-gradient(ellipse at 50% 30%,#1a1000 0%,var(--bg) 60%)}
 .result-box{background:var(--surface);border:2px solid var(--gold);border-radius:var(--radius3);padding:2.5rem;max-width:520px;width:90%;text-align:center}
 .result-title{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;margin-bottom:.5rem}
@@ -192,7 +177,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .result-row-label{color:var(--text3);font-size:.82rem}
 .result-row-val{font-family:'JetBrains Mono',monospace;color:var(--gold3)}
 
-/* TOAST */
 .toast-container{position:fixed;top:1rem;right:1rem;display:flex;flex-direction:column;gap:.5rem;z-index:200;pointer-events:none}
 .toast{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:.65rem 1rem;font-size:.82rem;font-family:'JetBrains Mono',monospace;color:var(--text);min-width:220px;animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards}
 .toast.success{border-color:var(--teal);color:var(--teal2)}
@@ -201,11 +185,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 @keyframes toastOut{from{opacity:1}to{opacity:0}}
 
-/* LOADING */
 .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold2);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* CHAT / MSG LOG */
 .msg-log{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:.3rem}
 .msg-item{padding:.35rem .6rem;border-radius:var(--radius);font-size:.78rem;font-family:'JetBrains Mono',monospace}
 .msg-item.you-msg{background:rgba(201,162,39,.08);color:var(--gold3);text-align:right}
@@ -216,7 +198,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .msg-send{background:var(--surface3);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius);padding:.4rem .6rem;cursor:pointer;font-size:.75rem;transition:all .2s}
 .msg-send:hover{border-color:var(--gold);color:var(--gold)}
 
-/* PHASE TRANSITIONS */
 .phase-transition{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:150;display:none;animation:phaseIn .4s ease}
 .phase-transition.show{display:flex}
 .phase-announce{text-align:center}
@@ -225,42 +206,20 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .phase-announce-sub{font-size:.9rem;color:var(--text3);margin-top:.5rem;font-family:'JetBrains Mono',monospace}
 @keyframes phaseIn{from{opacity:0}to{opacity:1}}
 
-/* Responsive */
 @media(max-width:768px){
-  /* On mobile: switch to full-page scroll, no fixed height trapping */
   #game-screen{overflow-y:auto}
   .game-layout{height:auto;min-height:100vh;grid-template-rows:auto auto}
-  .game-body{
-    grid-template-columns:1fr;
-    grid-template-rows:auto auto;
-    height:auto;
-    overflow:visible;
-  }
-  .main-panel{
-    overflow-y:visible;
-    padding:1rem;
-    padding-bottom:1.5rem;
-    min-height:0;
-    height:auto;
-  }
-  .side-panel{
-    border-left:none;
-    border-top:1px solid var(--border);
-    overflow-y:visible;
-    height:auto;
-    max-height:none;
-  }
-  /* Accusation + motive on mobile: 1 column so cards are full width and always visible */
+  .game-body{grid-template-columns:1fr;grid-template-rows:auto auto;height:auto;overflow:visible}
+  .main-panel{overflow-y:visible;padding:1rem;padding-bottom:1.5rem;min-height:0;height:auto}
+  .side-panel{border-left:none;border-top:1px solid var(--border);overflow-y:visible;height:auto;max-height:none}
   .accusation-grid{grid-template-columns:1fr}
   .motive-select{grid-template-columns:1fr}
   .puzzle-options{grid-template-columns:1fr}
-  /* Make header compact on mobile */
   .game-header{flex-wrap:wrap;gap:.5rem;padding:.5rem 1rem}
   .round-info{gap:.5rem}
   .score-val{font-size:.95rem}
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -268,7 +227,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 </head>
 <body>
 
-<!-- TOAST -->
 <div class="toast-container" id="toasts"></div>
 
 <!-- LOBBY -->
@@ -276,7 +234,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
   <div class="game-title">
     <span class="title-cold">Cold</span> <span class="title-read">Read</span>
   </div>
-  <div class="title-sub">Detective Duel · EQ × IQ</div>
+  <div class="title-sub">Detective Duel · EQ × IQ · 10 Rounds</div>
 
   <div class="lobby-panel">
     <div>
@@ -309,7 +267,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
     </div>
 
     <button class="btn btn-gold" onclick="connectToPeer()" id="connect-btn">Connect &amp; Challenge</button>
-    <button class="btn btn-outline" onclick="startSolo()">▶ Solo Practice (vs AI)</button>
+    <button class="btn btn-outline" onclick="startSolo()">▶ Solo Practice (vs AI) · 10 Rounds</button>
     <div id="conn-debug" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .75rem;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--text3);line-height:1.6"></div>
   </div>
 </div>
@@ -329,15 +287,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
     <div class="mirror-title">⚗ The Mirror Room</div>
     <div class="mirror-sub">ROUND 5 · PLANT A FAKE CLUE</div>
     <p style="font-size:.85rem;color:var(--text2);margin-bottom:1rem">Your opponent will see your hypothesis board for 10 seconds. Plant one fake clue to mislead them.</p>
-    
     <div id="mirror-my-hyp" class="mirror-hypothesis"></div>
-
     <div class="fake-clue-section">
       <label>Plant a fake clue (visible to opponent)</label>
       <input type="text" class="fake-clue-input" id="fake-clue-input" placeholder="e.g. Victim's phone showed messages from the butler…" maxlength="80">
     </div>
     <div class="mirror-planted" id="mirror-planted-msg"></div>
-
     <button class="btn btn-gold" style="width:100%;margin-top:1rem" onclick="submitMirrorRoom()">Confirm &amp; Reveal</button>
     <div style="font-size:.8rem;color:var(--text3);margin-top:.75rem;font-family:'JetBrains Mono',monospace">You will see opponent's board for <span style="color:var(--gold2)" id="mirror-countdown">10</span>s after both submit</div>
   </div>
@@ -346,7 +301,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 <!-- GAME SCREEN -->
 <div class="screen" id="game-screen">
   <div class="game-layout">
-    <!-- HEADER -->
     <div class="game-header">
       <div class="game-header-title">Cold Read</div>
       <div class="round-info">
@@ -366,14 +320,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
       </div>
     </div>
 
-    <!-- BODY -->
     <div class="game-body">
-      <!-- MAIN -->
-      <div class="main-panel" id="main-panel">
-        <!-- Injected per phase -->
-      </div>
+      <div class="main-panel" id="main-panel"></div>
 
-      <!-- SIDE -->
       <div class="side-panel">
         <div class="side-section">
           <div class="side-label">Behavioral Telemetry</div>
@@ -449,18 +398,18 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 </div>
 
 <script>
-// ─── GAME DATA ───────────────────────────────────────────────────────────────
+// ─── GAME DATA — 10 CASES ────────────────────────────────────────────────────
 const CASES = [
   {
-    id:1,title:"The Kadri Park Incident",location:"Mangaluru · Kadri Park Area",
-    text:"The victim, a retired professor, was found at 11 PM in their apartment near Kadri Park. The neighbor heard arguing at 9 PM. Security logs show 3 visitors: a delivery driver (8:30 PM), a childhood friend (9:15 PM), and a house cleaner (10:45 PM). The victim's phone shows a deleted call log. The window was forced open—but from the inside.",
+    id:1, title:"The Kadri Park Incident", location:"Mangaluru · Kadri Park Area",
+    text:"A retired professor was found dead at 11 PM in their apartment near Kadri Park. The neighbour heard loud arguing at 9 PM. Security logs show three visitors that evening: a delivery driver at 8:30 PM, a childhood friend at 9:15 PM, and a house cleaner at 10:45 PM. The victim's phone shows a wiped call log. Most strangely, the window was forced open — but from the inside.",
     clues:[
-      {icon:"📦",text:"Delivery driver logged out at 8:52 PM – confirmed via app GPS",noise:false},
+      {icon:"📦",text:"Delivery driver logged out at 8:52 PM — confirmed via app GPS",noise:false},
       {icon:"📱",text:"Deleted calls were to a private number registered in Mumbai",noise:false},
-      {icon:"🪟",text:"Window forced from inside – suggests staged break-in",noise:false},
-      {icon:"🌧️",text:"Rain started at 9:30 PM – outdoor footprints washed away",noise:true},
+      {icon:"🪟",text:"Window forced from inside — suggests a staged break-in",noise:false},
+      {icon:"🌧️",text:"Rain started at 9:30 PM — outdoor footprints washed away",noise:true},
       {icon:"🧹",text:"Cleaner's keycard shows entry at 10:45 PM, exit never recorded",noise:false},
-      {icon:"📺",text:"TV was still on – neighbours said victim always turned it off at 9",noise:true},
+      {icon:"📺",text:"TV was still on — neighbours said victim always turned it off at 9",noise:true},
     ],
     suspects:[
       {name:"Priya Nair",role:"Childhood Friend"},
@@ -468,20 +417,19 @@ const CASES = [
       {name:"Karim Hussain",role:"Delivery Driver"},
       {name:"Meena Kamath",role:"Neighbour"}
     ],
-    killer:"Rajan Shetty",
-    motive:"Greed",
-    puzzle:{type:"Cryptogram",question:"Decode the victim's last note (Caesar +3):\n\"TXLOW BDV KHUH DW WHQL\"",hint:"Shift each letter back 3 places",answer:"GUEST WAS HERE AT TENI",options:["GUEST WAS HERE AT TENI","KILLER LEFT AT NINE","HELP ME CALL POLICE","MONEY GONE FROM SAFE"],correct:0,unlocks:"Victim's note confirms a guest stayed past 10 PM – only the cleaner fits."}
+    killer:"Rajan Shetty", motive:"Greed",
+    puzzle:{type:"Cryptogram",question:'Decode the victim\'s last note (Caesar +3):\n"TXLOW BDV KHUH DW WHQL"',hint:"Shift each letter back 3 places",answer:"GUEST WAS HERE AT TENI",options:["GUEST WAS HERE AT TENI","KILLER LEFT AT NINE","HELP ME CALL POLICE","MONEY GONE FROM SAFE"],correct:0,unlocks:"Victim's note confirms a guest stayed past 10 PM — only the cleaner fits."}
   },
   {
-    id:2,title:"The Udupi Hotel Murder",location:"Udupi · Malpe Beach Resort",
-    text:"A businessman was found dead in his hotel room. The do-not-disturb sign was out all morning. His Swiggy order history shows food for two people at 11 PM. His laptop was wiped but the router logs show two devices in the room that night. His business partner was seen in the lobby at 10:40 PM.",
+    id:2, title:"The Udupi Hotel Murder", location:"Udupi · Malpe Beach Resort",
+    text:"A businessman was found dead in his resort room. The do-not-disturb sign was out all morning. His food delivery history shows an order for two people at 11 PM. His laptop was wiped, but router logs show two devices in the room that night. His business partner was seen in the lobby at 10:40 PM — nine minutes before the camera cut out.",
     clues:[
-      {icon:"🍱",text:"Swiggy order: 2 biryanis, 2 drinks – clearly for two people",noise:false},
-      {icon:"📡",text:"Router logs: 2 devices – victim's phone & an unregistered tablet",noise:false},
-      {icon:"💼",text:"Business partner claims he left at 10:50 PM – lobby camera cuts out at 10:48",noise:false},
-      {icon:"🌊",text:"High tide that night – beach access near hotel was flooded",noise:true},
-      {icon:"💻",text:"Laptop wiped with consumer-grade software – not a professional job",noise:false},
-      {icon:"🔑",text:"Room service record shows second keycard issued at 10:30 PM",noise:false},
+      {icon:"🍱",text:"Delivery order: 2 biryanis, 2 drinks — clearly ordered for two",noise:false},
+      {icon:"📡",text:"Router logs: 2 devices — victim's phone and an unregistered tablet",noise:false},
+      {icon:"💼",text:"Business partner claims he left at 10:50 PM — lobby camera cuts at 10:48",noise:false},
+      {icon:"🌊",text:"High tide that night — beach access near the hotel was flooded",noise:true},
+      {icon:"💻",text:"Laptop wiped with consumer-grade software — not a professional job",noise:false},
+      {icon:"🔑",text:"Room service record shows a second keycard issued at 10:30 PM",noise:false},
     ],
     suspects:[
       {name:"Anand Pai",role:"Business Partner"},
@@ -489,20 +437,19 @@ const CASES = [
       {name:"Thomas Mathew",role:"Room Service Staff"},
       {name:"Sunita Bhat",role:"Wife"}
     ],
-    killer:"Anand Pai",
-    motive:"Greed",
-    puzzle:{type:"Pattern Lock",question:"Which CCTV blind spot does the killer exploit?\n\nTime: 10:48–11:02 PM\nCamera A: Covers lobby → stairwell\nCamera B: Covers elevator → floor 3\nCamera C: Covers floor 3 → victim's room\n\nLobby camera cut at 10:48. Where did the killer go?",hint:"Think about which path avoids all active cameras",answer:"STAIRWELL TO FLOOR 3",options:["Lobby → Elevator → Floor 3","Stairwell → Floor 3 directly","Service corridor → Roof","Emergency exit → Parking"],correct:1,unlocks:"Killer used the stairwell, avoiding both Camera B and C. Partner's keycard explains room access."}
+    killer:"Anand Pai", motive:"Greed",
+    puzzle:{type:"Pattern Lock",question:"Which CCTV blind spot did the killer exploit?\n\nTime window: 10:48–11:02 PM\nCamera A: Covers lobby → stairwell\nCamera B: Covers elevator → floor 3\nCamera C: Covers floor 3 → victim's room\n\nLobby camera cut at 10:48. Which path avoids all active cameras?",hint:"Think about which route bypasses both Camera B and Camera C",answer:"STAIRWELL TO FLOOR 3",options:["Lobby → Elevator → Floor 3","Stairwell → Floor 3 directly","Service corridor → Roof","Emergency exit → Parking"],correct:1,unlocks:"Killer used the stairwell, avoiding Camera B and C. The second keycard explains room access."}
   },
   {
-    id:3,title:"The Lighthouse Disappearance",location:"Mangaluru · Old Port District",
-    text:"A journalist disappeared after publishing a story about port corruption. Her recorder was found at the base of the old lighthouse at midnight. The recording ends mid-sentence with the sound of approaching footsteps. Three port officials had motive. Her editor received a threatening email from an encrypted address 48 hours before.",
+    id:3, title:"The Lighthouse Disappearance", location:"Mangaluru · Old Port District",
+    text:"A journalist investigating port corruption vanished after filing her latest story. Her voice recorder was found at the base of the old lighthouse at midnight. The recording ends mid-sentence — footsteps audible, then silence. Three port officials had clear motive. Her editor received a threatening encrypted email 48 hours before she disappeared.",
     clues:[
-      {icon:"🎙️",text:"Recording ends at 11:57 PM – footsteps audible, then silence",noise:false},
+      {icon:"🎙️",text:"Recording ends at 11:57 PM — approaching footsteps, then silence",noise:false},
       {icon:"📧",text:"Threatening email traced to a café near the port authority office",noise:false},
       {icon:"⚓",text:"Port official Reddy's badge scanned at the port gate at 11:45 PM",noise:false},
-      {icon:"🌙",text:"Cloudy night – lighthouse beam was operational, poor visibility below",noise:true},
+      {icon:"🌙",text:"Cloudy night — lighthouse beam operational, poor visibility below",noise:true},
       {icon:"📋",text:"Journalist's notes mention a 'midnight meeting' with an unnamed source",noise:false},
-      {icon:"🚗",text:"Taxi records show a pickup 200m from lighthouse at 12:15 AM – passenger: unknown",noise:false},
+      {icon:"🚗",text:"Taxi records: pickup 200m from lighthouse at 12:15 AM — passenger unknown",noise:false},
     ],
     suspects:[
       {name:"Venkat Reddy",role:"Port Official"},
@@ -510,52 +457,190 @@ const CASES = [
       {name:"Mohammed Farooq",role:"Dock Supervisor"},
       {name:"Lila Menon",role:"Corrupt Lawyer"}
     ],
-    killer:"Venkat Reddy",
-    motive:"Protection",
-    puzzle:{type:"Logic Grid",question:"Cross-reference alibis:\n• Reddy: badge at port gate 11:45 PM (5 min to lighthouse)\n• Farooq: CCTV at fish market until midnight\n• D'Souza: Phone pinged tower 3km away at 11:50 PM\n• Menon: Flight records show she departed Mangaluru at 9 PM\n\nWho had both opportunity AND motive?",hint:"Only one person was physically close to the lighthouse at the right time",answer:"VENKAT REDDY",options:["Venkat Reddy – badge puts him 5 min away","Mohammed Farooq – fish market covers him","Sarah D'Souza – tower ping is alibi","Lila Menon – airport records clear her"],correct:0,unlocks:"Reddy's badge access and proximity to the lighthouse is the only logical match. The taxi picked up a second person."}
+    killer:"Venkat Reddy", motive:"Protection",
+    puzzle:{type:"Logic Grid",question:"Cross-reference the alibis:\n• Reddy: badge at port gate 11:45 PM (5 min walk to lighthouse)\n• Farooq: CCTV at fish market until midnight\n• D'Souza: Phone pinged tower 3km away at 11:50 PM\n• Menon: Flight records show she departed Mangaluru at 9 PM\n\nWho had both opportunity AND motive?",hint:"Only one person was physically near the lighthouse at the critical time",answer:"VENKAT REDDY",options:["Venkat Reddy — badge puts him 5 min away","Mohammed Farooq — fish market alibi holds","Sarah D'Souza — tower ping is her alibi","Lila Menon — airport records clear her"],correct:0,unlocks:"Reddy's badge access and proximity are the only logical match. The taxi may have carried a second witness."}
+  },
+  {
+    id:4, title:"The Curator's Last Exhibition", location:"Bengaluru · Lalbagh Art Gallery",
+    text:"A renowned art curator was found poisoned in the private viewing room after the gallery closed. The poison was in her evening tea. Three people had after-hours access: her assistant, a visiting artist, and the gallery's head of security. A priceless miniature painting went missing the same night. The assistant claims he left at 8 PM but his umbrella was found inside at 10 PM.",
+    clues:[
+      {icon:"☕",text:"Poison identified as aconitine — odourless, tasteless, slow-acting",noise:false},
+      {icon:"🖼️",text:"Missing miniature valued at ₹2.4 crore — recently appraised by the victim",noise:false},
+      {icon:"☂️",text:"Assistant's umbrella found in private room — he claims he left at 8 PM",noise:false},
+      {icon:"🌧️",text:"Heavy rain that night — the gallery's skylight was leaking",noise:true},
+      {icon:"🔐",text:"Security logs show the head's keycard used at 10:22 PM in the storage wing",noise:false},
+      {icon:"🎨",text:"Visiting artist had a prior dispute with the curator over attribution rights",noise:false},
+    ],
+    suspects:[
+      {name:"Arjun Nair",role:"Assistant Curator"},
+      {name:"Francesca Britto",role:"Visiting Artist"},
+      {name:"Suresh Pillai",role:"Head of Security"},
+      {name:"Riya Desai",role:"Gallery Trustee"}
+    ],
+    killer:"Arjun Nair", motive:"Greed",
+    puzzle:{type:"Timeline Lock",question:"Place these events in the correct order:\n\nA) Victim's tea prepared in the back pantry\nB) Gallery closes, staff begin departing\nC) Curator found unresponsive by night guard\nD) Assistant's umbrella last seen at his desk\nE) Aconitine takes 90–120 min to cause collapse\n\nIf collapse occurred at ~10:15 PM, when was tea poisoned?",hint:"Work backwards from collapse time using aconitine's onset window",answer:"B → A → D → E → C",options:["B → A → D → E → C","A → B → D → C → E","D → B → A → E → C","B → D → A → C → E"],correct:0,unlocks:"Tea poisoned between 8:15–8:45 PM during gallery closure. Only the assistant was in the pantry at that time."}
+  },
+  {
+    id:5, title:"The Software Founder's Fall", location:"Bengaluru · Koramangala Tech Hub",
+    text:"A startup founder was found dead in his 14th-floor office at 2 AM. The office door was locked from inside. His laptop shows he was actively editing a document at 1:47 AM. CCTV in the lift lobby shows no one entered after 1:30 AM. His co-founder stood to inherit full equity. A cleaner reported hearing a second voice through the door at 1:50 AM.",
+    clues:[
+      {icon:"💻",text:"Laptop activity at 1:47 AM — document titled 'Evidence_Final.pdf'",noise:false},
+      {icon:"🔒",text:"Office door locked from inside — deadbolt engaged, no secondary entry",noise:false},
+      {icon:"📹",text:"CCTV shows no entries after 1:30 AM — but the service stairwell camera was offline",noise:false},
+      {icon:"🧹",text:"Cleaner heard a second voice at 1:50 AM — described as 'calm and familiar'",noise:false},
+      {icon:"📊",text:"Co-founder's equity clause activates only upon accidental or natural death",noise:false},
+      {icon:"🌃",text:"Office AC unit was unusually loud that night — reported by two other floors",noise:true},
+    ],
+    suspects:[
+      {name:"Dev Menon",role:"Co-Founder"},
+      {name:"Nisha Rao",role:"Lead Engineer"},
+      {name:"Prakash Iyer",role:"Venture Capitalist"},
+      {name:"Amara Osei",role:"Operations Head"}
+    ],
+    killer:"Dev Menon", motive:"Greed",
+    puzzle:{type:"Access Audit",question:"Map the entry possibilities:\n\nMain lift: camera active — no entries after 1:30 AM\nService stairwell: camera OFFLINE since 1:15 AM\nRooftop access: requires separate keycard — only 2 issued\nRooftop keycard holders: Founder (victim) + Co-founder\n\nWho could have reached floor 14 after 1:30 AM undetected?",hint:"The offline camera and rooftop keycard together point to one person",answer:"DEV MENON VIA ROOFTOP",options:["Dev Menon via rooftop keycard","Nisha Rao via service stairwell","Prakash Iyer via main lift","Amara Osei via emergency exit"],correct:0,unlocks:"Co-founder's rooftop keycard allowed access to floor 14 via stairwell — the only unmonitored route after 1:30 AM."}
+  },
+  {
+    id:6, title:"The Spice Merchant's Secret", location:"Kochi · Fort Kochi Heritage Quarter",
+    text:"A 70-year-old spice merchant was found drowned in his private courtyard well at dawn. His family home held a disputed will — three heirs stood to gain. A neighbour saw someone in a red dupatta leaving the compound at 4:30 AM. The merchant had recently changed his will, cutting out his eldest son entirely. His personal diary went missing the same morning.",
+    clues:[
+      {icon:"📜",text:"Revised will signed 3 days ago — eldest son removed, niece added",noise:false},
+      {icon:"🔴",text:"Neighbour describes red dupatta — youngest daughter owns one, niece owns two",noise:false},
+      {icon:"📓",text:"Personal diary missing — last entry referenced 'confrontation tonight'",noise:false},
+      {icon:"🌅",text:"Dawn fog was heavy that morning — visibility under 20 metres",noise:true},
+      {icon:"💧",text:"Well rope showed fresh abrasion marks — inconsistent with accidental fall",noise:false},
+      {icon:"📞",text:"Eldest son's phone records show a call to the niece at 3:50 AM",noise:false},
+    ],
+    suspects:[
+      {name:"Vikram Nair",role:"Eldest Son"},
+      {name:"Shalini Nair",role:"Youngest Daughter"},
+      {name:"Preethi Menon",role:"Niece"},
+      {name:"George Thomas",role:"Business Partner"}
+    ],
+    killer:"Preethi Menon", motive:"Greed",
+    puzzle:{type:"Witness Logic",question:"Reconstruct the timeline from witness accounts:\n\n• Merchant last seen alive by wife at 3:30 AM (using bathroom)\n• Neighbour sees red dupatta figure leaving at 4:30 AM\n• Body discovered at 5:45 AM by the household cook\n• Niece owns two red dupattas — one found wet in her room\n• Eldest son's call to niece at 3:50 AM lasted 4 minutes\n\nWhat does the wet dupatta prove?",hint:"Combine the call time, departure sighting, and physical evidence",answer:"NIECE WAS AT THE WELL",options:["Niece was at the well during the murder window","Daughter wore the dupatta and is the killer","Son coordinated the murder remotely by phone","Dupatta was wet from morning dew — coincidence"],correct:0,unlocks:"Wet dupatta + red sighting + 3:50 AM coordination call place the niece at the scene between 3:54 AM and 4:30 AM."}
+  },
+  {
+    id:7, title:"The Tea Estate Poisoning", location:"Coorg · Madikeri Estate Hills",
+    text:"The owner of a century-old tea estate was found dead in the tasting room after a private dinner with three guests. A rare alkaloid was detected in one of the tea samples. All four people present drank from the communal pot — only the host died. The surviving guests gave conflicting accounts of who poured the final cup. A hidden inheritance dispute had simmered for years.",
+    clues:[
+      {icon:"🍵",text:"Rare alkaloid found only in one cup — the one poured last for the host",noise:false},
+      {icon:"📸",text:"Security photo shows guest Latha reaching across the table at 9:11 PM",noise:false},
+      {icon:"💰",text:"Estate worth ₹8 crore — Latha is listed as secondary beneficiary",noise:false},
+      {icon:"🌿",text:"Alkaloid sourced from a local plant — requires advance preparation",noise:false},
+      {icon:"🍃",text:"Estate foreman says owner planned to sell the estate — Latha opposed it",noise:false},
+      {icon:"🌧️",text:"Power went out for 3 minutes at 9:08 PM — generator kicked in",noise:true},
+    ],
+    suspects:[
+      {name:"Latha Cariappa",role:"Distant Relative & Beneficiary"},
+      {name:"Rohan Mathew",role:"Business Buyer"},
+      {name:"Dr. Srini Kaul",role:"Family Doctor"},
+      {name:"Joseph Pinto",role:"Estate Foreman"}
+    ],
+    killer:"Latha Cariappa", motive:"Greed",
+    puzzle:{type:"Poison Timeline",question:"The alkaloid requires 45–60 min to cause death after ingestion.\nDinner began at 8:00 PM. Victim collapsed at 9:30 PM.\n\nWhen was the poison administered?\n\nKey events:\n• 8:00 PM — Dinner starts, first tea poured\n• 8:45 PM — Second round of tea poured\n• 9:05 PM — Victim requests a third cup\n• 9:08 PM — Power outage (3 min)\n• 9:11 PM — Photo captures Latha reaching across table\n• 9:30 PM — Victim collapses",hint:"Work backwards from collapse. Aconitine needs 45–60 min. Which pour fits?",answer:"SECOND POUR AT 8:45 PM",options:["First pour at 8:00 PM — too early","Second pour at 8:45 PM — fits the window","Third cup at 9:05 PM — too late","During power outage at 9:08 PM"],correct:1,unlocks:"Poison administered at 8:45 PM — Latha poured the second round. The 9:11 PM photo shows her confirming the dose reached the victim's cup."}
+  },
+  {
+    id:8, title:"The Film Director's Last Cut", location:"Chennai · Kodambakkam Studio District",
+    text:"A celebrated Tamil film director was found stabbed in his private editing suite at midnight. The suite's keypad locks from inside, but the emergency exit was ajar. Three people had been in a heated argument with him that week over a disputed screenplay credit. His hard drive — containing the final cut of his next film — was stolen.",
+    clues:[
+      {icon:"🎬",text:"Stolen hard drive contained the film's only master copy — worth crores",noise:false},
+      {icon:"🚪",text:"Emergency exit ajar — panic bar operable from inside only",noise:false},
+      {icon:"✍️",text:"Disputed screenplay: writer claims director plagiarised her script",noise:false},
+      {icon:"📱",text:"Director's last WhatsApp — sent to producer at 11:42 PM: 'She's here'",noise:false},
+      {icon:"🎞️",text:"Film lab technician found a partial fingerprint on the editing console",noise:false},
+      {icon:"🌃",text:"Studio area had a power surge at 11:55 PM — some cameras reset",noise:true},
+    ],
+    suspects:[
+      {name:"Kavitha Sundaram",role:"Screenwriter"},
+      {name:"Ravi Krishnan",role:"Film Producer"},
+      {name:"Mani Pillai",role:"Lab Technician"},
+      {name:"Shalini Bose",role:"Lead Actress"}
+    ],
+    killer:"Kavitha Sundaram", motive:"Revenge",
+    puzzle:{type:"Message Decode",question:"The director's final WhatsApp said: 'She's here'\nSent at 11:42 PM. Death estimated between 11:45–11:55 PM.\n\nOnly one female suspect had confirmed access to the studio that night:\n• Kavitha — badge scan at studio gate: 11:38 PM\n• Shalini — confirmed at an event across town until midnight\n• Ravi — male, eliminated\n• Mani — male, eliminated\n\nWhat does 'She's here' combined with Kavitha's badge time prove?",hint:"The director named the gender. Cross with the only female on site.",answer:"KAVITHA ARRIVED MINUTES BEFORE MURDER",options:["Kavitha arrived 4 min before estimated murder window","Shalini was on site despite the alibi event","Ravi hired Kavitha to commit the crime","Mani's fingerprint makes him the killer"],correct:0,unlocks:"'She's here' at 11:42 PM + Kavitha's 11:38 PM badge scan = she was the last person the director acknowledged before death."}
+  },
+  {
+    id:9, title:"The Haunted Haveli Mystery", location:"Jodhpur · Old City Haveli District",
+    text:"A heritage hotel owner was found dead in the sealed Blue Room — a chamber said to be haunted and kept locked for decades. The door was bolted from inside with an iron bar. No windows. The victim had re-opened the room that morning after finding a hidden passage. Three family members were in the haveli that night, each with a motive tied to the property's ownership.",
+    clues:[
+      {icon:"🔩",text:"Iron bar door bolt — can only be engaged from inside the room",noise:false},
+      {icon:"🕳️",text:"Hidden passage behind a false wall — discovered by victim that morning",noise:false},
+      {icon:"📜",text:"Property deed dispute — eldest cousin stands to inherit if owner dies intestate",noise:false},
+      {icon:"🕯️",text:"Melted candle wax found near the passage entrance — recent use",noise:false},
+      {icon:"👣",text:"Dusty passage shows two sets of footprints — one entering, one leaving",noise:false},
+      {icon:"🦇",text:"Bat colony in the upper roof — common in old havelis, no relevance",noise:true},
+    ],
+    suspects:[
+      {name:"Deepak Rathore",role:"Eldest Cousin"},
+      {name:"Sunaina Rathore",role:"Youngest Sister"},
+      {name:"Bilal Sheikh",role:"Hotel Manager"},
+      {name:"Chanda Devi",role:"Housekeeper"}
+    ],
+    killer:"Deepak Rathore", motive:"Greed",
+    puzzle:{type:"Locked Room Logic",question:"The Blue Room has:\n• One door — iron-barred from inside\n• No windows\n• One hidden passage — just discovered that morning\n\nFootprints in the passage: one set entering, one set leaving.\nThe bar was found engaged after death.\n\nHow did the killer exit and re-engage the iron bar from outside?",hint:"The hidden passage is the key — and the bar can only be manipulated if someone was still inside... or was it?",answer:"KILLER USED PASSAGE THEN JAMMED BAR WITH WIRE",options:["Killer used the passage, jammed the bar with a wire through the gap","Victim barred the door and the death was accidental","Killer hid inside the room until morning and escaped later","There was a second hidden passage not yet discovered"],correct:0,unlocks:"Two footprint sets confirm the killer entered via the passage, murdered the victim, then threaded a wire to drop the iron bar before retreating. Classic locked-room construct."}
+  },
+  {
+    id:10, title:"The Diamond Merchant's Gambit", location:"Surat · Diamond Bourse District",
+    text:"A veteran diamond merchant was found dead in his private vault after the market closed. The vault requires two simultaneous keycards — his and his trusted broker's. A parcel of uncut diamonds worth ₹15 crore is missing. The broker claims she left before the vault was opened, but a surveillance frame shows her keycard scanner active at 6:14 PM. The merchant had been planning to expose a cartel.",
+    clues:[
+      {icon:"💎",text:"₹15 crore in uncut diamonds missing — no signs of forced entry on the vault",noise:false},
+      {icon:"🔐",text:"Vault requires two simultaneous keycards — merchant's + broker's",noise:false},
+      {icon:"📹",text:"Surveillance frame at 6:14 PM shows broker's keycard scanner active",noise:false},
+      {icon:"📁",text:"Victim had compiled a dossier on a price-fixing cartel — files now gone",noise:false},
+      {icon:"🤝",text:"Broker stood to lose her license and freedom if the cartel was exposed",noise:false},
+      {icon:"🏙️",text:"Heavy traffic outside the bourse — many vehicles in CCTV blindspot",noise:true},
+    ],
+    suspects:[
+      {name:"Heena Vora",role:"Senior Broker"},
+      {name:"Rajesh Mehta",role:"Rival Merchant"},
+      {name:"Ankit Shah",role:"Junior Apprentice"},
+      {name:"Farida Qureshi",role:"Cartel Liaison"}
+    ],
+    killer:"Heena Vora", motive:"Protection",
+    puzzle:{type:"Keycard Proof",question:"The vault log records:\n• 6:10 PM — Merchant's keycard scanned (confirmed)\n• 6:14 PM — Second keycard scanner active (whose?)\n• 6:18 PM — Vault door seal engaged\n• 7:30 PM — Vault found open by night security\n\nBroker's alibi: 'I left the building at 6:00 PM'\nBuilding exit log: Broker's exit badge scanned at 6:02 PM\n\nHow was her keycard active at 6:14 PM if she left at 6:02 PM?",hint:"A badge can leave the building while the keycard stays behind — or is cloned",answer:"BROKER CLONED HER KEYCARD BEFORE LEAVING",options:["Broker cloned her keycard and gave it to an accomplice inside","Broker snuck back in through an unmarked entrance","The scanner malfunctioned and logged the wrong card","Merchant had a copy of the broker's keycard himself"],correct:0,unlocks:"Exit log confirms physical departure at 6:02 PM. A cloned keycard used by Farida Qureshi as inside accomplice — both conspired. Primary liability falls on Heena Vora as the mastermind."}
   }
 ];
 
 const TRAITS = [
   {id:"visual",label:"Visual Thinker",sub:"Solves spatial puzzles first",exploit:"They miss audio/text clues"},
   {id:"cautious",label:"Perfectionist",sub:"Uses full timer every time",exploit:"Rush with false urgency"},
-  {id:"risk",label:"Risk-Taker",sub:"Early aggressive accusations",exploit:"Plant red herrings – they'll bite"},
+  {id:"risk",label:"Risk-Taker",sub:"Early aggressive accusations",exploit:"Plant red herrings — they'll bite"},
   {id:"anxious",label:"Anxious Tracker",sub:"Monitors opponent constantly",exploit:"Fake confidence signals"}
 ];
 
-const MOTIVES=["Greed","Revenge","Jealousy","Protection"];
+const MOTIVES = ["Greed","Revenge","Jealousy","Protection"];
+const MAX_ROUNDS = 10;
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
-let state={
-  peer:null,conn:null,isSolo:false,
-  myName:"Detective",oppName:"Opponent",
-  myScore:0,oppScore:0,
-  round:1,phase:1,
+let state = {
+  peer:null, conn:null, isSolo:false,
+  myName:"Detective", oppName:"Opponent",
+  myScore:0, oppScore:0,
+  round:1, phase:1,
   currentCase:null,
+  usedCaseIndices:[],
   myTelem:{hesitation:0,corrections:0,puzzleTime:0},
   oppTelem:{hesitation:0,corrections:0,puzzleTime:0},
-  myProfile:[],oppProfile:[],
   assignedOppTraits:[],
   selectedTraits:[],
-  selectedSuspect:null,selectedMotive:null,
-  puzzleStartTime:0,puzzleSolved:false,puzzleSubmitted:false,
-  phaseTimer:null,timerInterval:null,
-  mirrorDone:false,mirrorShown:false,
-  fakeClue:"",oppFakeClue:"",
-  roundResults:[],
+  selectedSuspect:null, selectedMotive:null,
+  puzzleStartTime:0, puzzleSolved:false, puzzleSubmitted:false,
+  phaseTimer:null, timerInterval:null,
+  mirrorDone:false,
+  fakeClue:"", oppFakeClue:"",
   profileBonus:false,
-  myHypothesis:"",
+  myHypothesis:"", oppHypothesis:"",
   puzzleTimeLimit:45,
-  myPuzzleTime:null,oppPuzzleTime:null,
-  bothAccused:false,
-  myAccusation:null,oppAccusation:null,
-  waitingForOpp:false,
+  myPuzzleTime:null, oppPuzzleTime:null,
+  myAccusation:null, oppAccusation:null,
   correctionCount:0,
   lastClickTime:Date.now(),
-  telemInterval:null
+  telemInterval:null,
+  nextRoundLock:false
 };
 
-// ─── PEER.JS SETUP ───────────────────────────────────────────────────────────
+// ─── PEER.JS ─────────────────────────────────────────────────────────────────
 function connLog(msg){
   const el=document.getElementById('conn-debug');
   if(!el) return;
@@ -566,50 +651,34 @@ function connLog(msg){
 }
 
 function initPeer(){
-  const peer=new Peer(undefined,{
-    debug:1,
-    config:{
-      iceServers:[
-        {urls:'stun:stun.l.google.com:19302'},
-        {urls:'stun:stun1.l.google.com:19302'}
-      ]
-    }
-  });
+  const peer=new Peer(undefined,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
   state.peer=peer;
   peer.on('open',id=>{
     document.getElementById('my-peer-id').textContent=id;
     connLog("Peer open. Your ID: "+id.slice(0,8)+"…");
-    toast("Your ID ready – share it!","info");
+    toast("Your ID ready — share it!","info");
   });
-  // HOST side: someone connected TO us – wait for their handshake before starting
   peer.on('connection',conn=>{
     state.myName=document.getElementById('my-name').value.trim()||"Detective";
     state.isHost=true;
     setupConn(conn);
-    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Opponent connected – waiting for handshake…</div>`;
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Opponent connected — waiting for handshake…</div>`;
   });
-  peer.on('error',e=>{
-    connLog("ERROR: "+e.type+" – "+e.message);
-    toast("PeerJS error: "+e.type,"error");
-    document.getElementById('my-peer-id').textContent="Error – refresh page";
-  });
-  peer.on('disconnected',()=>{
-    peer.reconnect();
-  });
+  peer.on('error',e=>{connLog("ERROR: "+e.type);toast("PeerJS error: "+e.type,"error");});
+  peer.on('disconnected',()=>peer.reconnect());
 }
 
 function setupConn(conn){
   state.conn=conn;
   conn.on('data',handleData);
   conn.on('close',()=>toast("Connection closed","error"));
-  conn.on('error',e=>toast("Conn error","error"));
+  conn.on('error',()=>toast("Connection error","error"));
 }
 
 function connectToPeer(){
   const id=document.getElementById('opp-id-input').value.trim();
   const name=document.getElementById('my-name').value.trim()||"Detective";
   if(!id){toast("Enter opponent ID","error");return}
-  if(id===document.getElementById('my-peer-id').textContent){toast("That is your own ID!","error");return}
   state.myName=name;
   state.isHost=false;
   const btn=document.getElementById('connect-btn');
@@ -617,54 +686,37 @@ function connectToPeer(){
   const conn=state.peer.connect(id,{reliable:true});
   setupConn(conn);
   conn.on('open',()=>{
-    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Connected – shaking hands…</div>`;
-    // Small delay to ensure data channel is fully open before sending
-    connLog("Channel open – sending handshake as joiner");
+    connLog("Channel open — sending handshake");
     setTimeout(()=>sendMsg_raw({type:"handshake",name:state.myName}),300);
   });
-  conn.on('error',e=>{
-    toast("Could not connect – check the ID","error");
-    btn.textContent="Connect & Challenge";btn.disabled=false;
-  });
-  setTimeout(()=>{
-    if(!conn.open){
-      toast("Timed out – check ID and try again","error");
-      btn.textContent="Connect & Challenge";btn.disabled=false;
-    }
-  },15000);
+  conn.on('error',()=>{toast("Could not connect — check the ID","error");btn.textContent="Connect & Challenge";btn.disabled=false;});
+  setTimeout(()=>{if(!conn.open){toast("Timed out — check ID","error");btn.textContent="Connect & Challenge";btn.disabled=false;}},15000);
 }
 
 function handleData(data){
   if(data.type==="handshake"){
-    // Received by HOST from joiner – host picks case and sends start
     connLog("HOST: received handshake from "+data.name);
     state.oppName=data.name;
     toast(data.name+" connected! Starting game…","success");
     document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Playing vs ${data.name}</div>`;
-    const idx=Math.floor(Math.random()*CASES.length);
+    const idx=pickNextCase();
     state.currentCase=CASES[idx];
-    // Send start to joiner, then begin ourselves after a short delay
     setTimeout(()=>{
-      sendMsg_raw({type:"start",name:state.myName,caseIndex:idx});
+      sendMsg_raw({type:"start",name:state.myName,caseIndex:idx,usedCases:[idx]});
       setTimeout(()=>startGame(false),300);
     },200);
   }
   else if(data.type==="start"){
-    // Received by JOINER from host
-    connLog("JOINER: received start from host, case #"+(data.caseIndex+1));
+    connLog("JOINER: received start, case #"+(data.caseIndex+1));
     state.oppName=data.name;
     state.currentCase=CASES[data.caseIndex];
-    toast("Game starting – Case #"+(data.caseIndex+1),"success");
+    if(data.usedCases) state.usedCaseIndices=data.usedCases;
+    toast("Game starting — Case #"+(data.caseIndex+1),"success");
     document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span> Playing vs ${data.name}</div>`;
     setTimeout(()=>startGame(true,data.caseIndex),300);
   }
-  else if(data.type==="telem"){
-    state.oppTelem=data.telem;
-    updateTelemUI();
-  }
-  else if(data.type==="opp_status"){
-    document.getElementById('opp-status-text').textContent=data.status;
-  }
+  else if(data.type==="telem"){state.oppTelem=data.telem;updateTelemUI();}
+  else if(data.type==="opp_status"){document.getElementById('opp-status-text').textContent=data.status;}
   else if(data.type==="puzzle_done"){
     state.oppPuzzleTime=data.time;
     addLog(state.oppName+" solved puzzle in "+data.time+"s","opp");
@@ -681,22 +733,18 @@ function handleData(data){
     state.oppHypothesis=data.hypothesis;
     showOppMirror();
   }
-  else if(data.type==="profile_submit"){
-    // opponent submitted profile guesses – we reveal ours
-  }
-  else if(data.type==="chat"){
-    addChatMsg(data.text,false);
-  }
+  else if(data.type==="chat"){addChatMsg(data.text,false);}
   else if(data.type==="next_round"){
-    advanceRound();
+    if(!state.nextRoundLock) advanceRound();
+  }
+  else if(data.type==="new_case"){
+    state.currentCase=CASES[data.caseIndex];
+    state.usedCaseIndices=data.usedCases;
   }
 }
 
 function sendMsg_raw(obj){
-  if(state.conn&&state.conn.open){
-    try{state.conn.send(obj);}catch(e){console.warn("send failed:",e);}
-  }
-  // silently drop if not connected (solo mode or conn not open)
+  if(state.conn&&state.conn.open){try{state.conn.send(obj);}catch(e){console.warn("send failed:",e);}}
 }
 
 function copyMyId(){
@@ -704,37 +752,40 @@ function copyMyId(){
   navigator.clipboard.writeText(id).then(()=>toast("ID copied!","success"));
 }
 
-// ─── SOLO MODE ───────────────────────────────────────────────────────────────
+// ─── CASE SELECTION ───────────────────────────────────────────────────────────
+function pickNextCase(){
+  const available=CASES.map((_,i)=>i).filter(i=>!state.usedCaseIndices.includes(i));
+  if(available.length===0){
+    // All cases used — reset pool
+    state.usedCaseIndices=[];
+    return Math.floor(Math.random()*CASES.length);
+  }
+  const idx=available[Math.floor(Math.random()*available.length)];
+  state.usedCaseIndices.push(idx);
+  return idx;
+}
+
+// ─── SOLO MODE ────────────────────────────────────────────────────────────────
 function startSolo(){
   state.isSolo=true;
   state.myName=document.getElementById('my-name').value.trim()||"Detective";
   state.oppName="AI Dali";
-  startGame(false,0);
+  const idx=pickNextCase();
+  state.currentCase=CASES[idx];
+  startGame(false,idx);
 }
 
-// ─── GAME START ──────────────────────────────────────────────────────────────
+// ─── GAME START ───────────────────────────────────────────────────────────────
 function startGame(isReceiver,caseIndex){
-  // Case is already set by handleData or solo init before this is called
-  // isReceiver=true means we are the joiner and already have state.currentCase
-  // isReceiver=false means we are host (or solo) and currentCase is already set
-  if(state.isSolo){
-    // Solo: pick case right here
-    const idx=caseIndex!==undefined?caseIndex:Math.floor(Math.random()*CASES.length);
-    state.currentCase=CASES[idx];
-  }
-  if(!state.currentCase){
-    toast("Error: no case loaded – refresh and try again","error");
-    return;
-  }
-  // Assign random traits to opponent for Cold Read phase
+  if(!state.currentCase){toast("Error: no case loaded — refresh","error");return}
   state.assignedOppTraits=shuffleArr([...TRAITS]).slice(0,2).map(t=>t.id);
   showScreen('game-screen');
   updateHeader();
   startTelemetry();
-  showPhaseTransition("Phase 1","The Case File","Study the evidence carefully",()=>renderPhase1());
+  showPhaseTransition("Round 1","The Case File","Study the evidence carefully",()=>renderPhase1());
 }
 
-// ─── PHASES ──────────────────────────────────────────────────────────────────
+// ─── PHASE 1 — CASE FILE ─────────────────────────────────────────────────────
 function renderPhase1(){
   state.phase=1;
   updatePhaseLabel("Case File · Evidence Review");
@@ -748,25 +799,21 @@ function renderPhase1(){
 
   mainPanel(`
     <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
-      ${[1,2,3,4].map((p,i)=>`<div class="phase-pip ${i===0?'active':''}" id="pip-${i}"></div>`).join('')}
+      ${[1,2,3,4].map((_,i)=>`<div class="phase-pip ${i===0?'active':''}" id="pip-${i}"></div>`).join('')}
     </div>
-    <div class="phase-label">Phase 1 · Evidence Review</div>
-
+    <div class="phase-label">Phase 1 · Evidence Review · Round ${state.round}/${MAX_ROUNDS}</div>
     <div class="case-card">
       <div class="case-title">${c.title}</div>
       <div class="case-location">📍 ${c.location}</div>
       <div class="case-body">${c.text}</div>
     </div>
-
     <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem">
       <div style="font-size:.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.2rem">Evidence Clues · 20% may be noise</div>
       ${cluesHTML}
     </div>
-
     <div style="margin-top:.75rem">
       <textarea id="my-hyp-input" placeholder="Type your working hypothesis here… (notes are private)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;outline:none;resize:vertical;min-height:80px;line-height:1.6" oninput="state.correctionCount+=0.1;state.myHypothesis=this.value"></textarea>
     </div>
-
     <button class="btn btn-gold" style="width:100%;margin-bottom:env(safe-area-inset-bottom,0px)" onclick="proceedToPhase2()">Proceed to Puzzle Gate →</button>
   `);
   setPips([0]);
@@ -781,6 +828,7 @@ function proceedToPhase2(){
   showPhaseTransition("Phase 2","Puzzle Gate","Solve to unlock critical evidence",()=>renderPhase2());
 }
 
+// ─── PHASE 2 — PUZZLE ────────────────────────────────────────────────────────
 function renderPhase2(){
   state.phase=2;
   updatePhaseLabel("Puzzle Gate");
@@ -791,13 +839,12 @@ function renderPhase2(){
   state.myPuzzleTime=null;
   const p=state.currentCase.puzzle;
   let optHTML=p.options.map((o,i)=>`<div class="puzzle-opt" onclick="selectPuzzleOpt(${i})" id="popt-${i}">${o}</div>`).join('');
-  
+
   mainPanel(`
     <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
       ${[0,1,2,3].map((i)=>`<div class="phase-pip ${i<1?'done':i===1?'active':''}" id="pip-${i}"></div>`).join('')}
     </div>
     <div class="phase-label">Phase 2 · Puzzle Gate · ${p.type}</div>
-
     <div class="puzzle-card">
       <div class="puzzle-header">
         <div class="puzzle-type">${p.type}</div>
@@ -814,7 +861,6 @@ function renderPhase2(){
       <div class="puzzle-options">${optHTML}</div>
       <button class="btn btn-gold" style="width:100%;margin-top:.25rem" id="puzzle-submit-btn" onclick="submitPuzzle()" disabled>Submit Answer</button>
     </div>
-
     <div class="unlocked-clue" id="unlocked-clue">
       <strong style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:.1em">🔓 Evidence Unlocked</strong>
       <div style="margin-top:.4rem" id="unlocked-text"></div>
@@ -844,37 +890,29 @@ function submitPuzzle(){
   addLog("You solved puzzle in "+elapsed+"s","you");
   sendMsg_raw({type:"puzzle_done",time:elapsed});
   updateTelemYouSpeed(elapsed);
-
   const p=state.currentCase.puzzle;
   if(selectedPuzzleOpt===p.correct){
     state.puzzleSolved=true;
     document.getElementById('popt-'+selectedPuzzleOpt).classList.add('correct');
-    const uc=document.getElementById('unlocked-clue');
     document.getElementById('unlocked-text').textContent=p.unlocks;
-    uc.classList.add('show');
+    document.getElementById('unlocked-clue').classList.add('show');
     toast("Puzzle solved! Evidence unlocked","success");
   } else {
     document.getElementById('popt-'+selectedPuzzleOpt).classList.add('wrong');
     document.getElementById('popt-'+p.correct).classList.add('correct');
-    toast("Wrong – but you may still proceed","error");
+    toast("Wrong — but you may still proceed","error");
   }
-  setTimeout(()=>{
-    checkBothPuzzleDone();
-  },1500);
+  setTimeout(()=>checkBothPuzzleDone(),1500);
 }
 
 function checkBothPuzzleDone(){
-  if(state.isSolo){
-    // Solo: simulate AI time if not already set
-    if(!state.oppPuzzleTime){
-      state.oppPuzzleTime=Math.floor(Math.random()*20)+10;
-      updateTelemOppSpeed(state.oppPuzzleTime);
-    }
+  if(state.isSolo&&!state.oppPuzzleTime){
+    state.oppPuzzleTime=Math.floor(Math.random()*20)+10;
+    updateTelemOppSpeed(state.oppPuzzleTime);
   }
   if(state.myPuzzleTime!==null&&(state.oppPuzzleTime!==null||state.isSolo)){
     setTimeout(()=>showPhaseTransition("Phase 3","Cold Read","Profile your opponent's psychology",()=>renderPhase3()),800);
   } else {
-    updateOppStatus("Waiting for "+state.oppName+" to solve…");
     document.getElementById('opp-status-text').textContent="Solving puzzle…";
   }
 }
@@ -887,32 +925,22 @@ function startPuzzleTimer(){
     const fill=document.getElementById('timer-fill');
     const txt=document.getElementById('timer-text');
     if(!fill){clearInterval(state.timerInterval);return}
-    const offset=circumference*(1-remaining/state.puzzleTimeLimit);
-    fill.style.strokeDashoffset=offset;
+    fill.style.strokeDashoffset=circumference*(1-remaining/state.puzzleTimeLimit);
     txt.textContent=remaining;
     if(remaining<=10) fill.style.stroke='var(--red2)';
-    if(remaining<=0){
-      clearInterval(state.timerInterval);
-      // FIX 2: always auto-submit when timer expires, regardless of selection
-      autoSubmitPuzzle();
-    }
+    if(remaining<=0){clearInterval(state.timerInterval);autoSubmitPuzzle();}
   },1000);
 }
 
-// FIX 2: autoSubmitPuzzle now always advances — it marks time, reveals correct answer,
-// then forces checkBothPuzzleDone so the flow never gets stuck after timeout.
 function autoSubmitPuzzle(){
   if(state.puzzleSubmitted) return;
   state.puzzleSubmitted=true;
   clearInterval(state.timerInterval);
-
   const elapsed=state.puzzleTimeLimit;
   state.myPuzzleTime=elapsed;
-  addLog("Time expired – auto-submitted","you");
+  addLog("Time expired — auto-submitted","you");
   sendMsg_raw({type:"puzzle_done",time:elapsed});
   updateTelemYouSpeed(elapsed);
-
-  // Reveal the correct answer visually so player isn't left confused
   const p=state.currentCase.puzzle;
   const correctEl=document.getElementById('popt-'+p.correct);
   if(correctEl) correctEl.classList.add('correct');
@@ -920,17 +948,13 @@ function autoSubmitPuzzle(){
     const wrongEl=document.getElementById('popt-'+selectedPuzzleOpt);
     if(wrongEl) wrongEl.classList.add('wrong');
   }
-
-  // Disable submit button
   const btn=document.getElementById('puzzle-submit-btn');
-  if(btn){btn.disabled=true;btn.textContent='Time\'s Up';}
-
+  if(btn){btn.disabled=true;btn.textContent="Time's Up";}
   toast("Time's up! Moving on…","error");
-
-  // Force advance after a brief pause so player sees the reveal
   setTimeout(()=>checkBothPuzzleDone(),1500);
 }
 
+// ─── PHASE 3 — COLD READ ─────────────────────────────────────────────────────
 function renderPhase3(){
   state.phase=3;
   updatePhaseLabel("Cold Read · Profiling");
@@ -948,15 +972,13 @@ function renderPhase3(){
     <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
       ${[0,1,2,3].map((i)=>`<div class="phase-pip ${i<2?'done':i===2?'active':''}" id="pip-${i}"></div>`).join('')}
     </div>
-    <div class="phase-label">Phase 3 · Cold Read</div>
-
+    <div class="phase-label">Phase 3 · Cold Read · Round ${state.round}/${MAX_ROUNDS}</div>
     <div class="profile-card">
       <div class="profile-title">🧠 Opponent Psychological Profile</div>
       <p style="font-size:.82rem;color:var(--text3);margin-bottom:1rem;font-family:'JetBrains Mono',monospace">Based on behavioral telemetry, select 2 traits you believe describe <strong style="color:var(--text)">${state.oppName}</strong>:</p>
       <div class="trait-grid" id="trait-grid">${traitHTML}</div>
       <div style="margin-top:.75rem;font-size:.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace" id="trait-count-hint">Select exactly 2 traits</div>
     </div>
-
     <button class="btn btn-gold" style="width:100%" onclick="submitProfile()">Submit Profile Read →</button>
   `);
   setPips([0,1,2]);
@@ -980,43 +1002,33 @@ function toggleTrait(id){
 
 function submitProfile(){
   if(state.selectedTraits.length!==2){toast("Select exactly 2 traits","error");return}
-  // Check correctness
   const correct=state.selectedTraits.filter(t=>state.assignedOppTraits.includes(t));
-  const bonus=correct.length>=2;
-  state.profileBonus=bonus;
-  // Reveal results
+  state.profileBonus=correct.length>=2;
   state.selectedTraits.forEach(id=>{
     const el=document.getElementById('trait-'+id);
     if(state.assignedOppTraits.includes(id)){
-      el.classList.remove('selected'); el.classList.add('correct-trait');
+      el.classList.remove('selected');el.classList.add('correct-trait');
       document.getElementById('tcheck-'+id).textContent='✓';
     } else {
-      el.classList.remove('selected'); el.classList.add('wrong-trait');
+      el.classList.remove('selected');el.classList.add('wrong-trait');
       document.getElementById('tcheck-'+id).textContent='✗';
     }
   });
-  // Show all correct traits
   state.assignedOppTraits.forEach(id=>{
     const el=document.getElementById('trait-'+id);
-    if(!el) return;
-    if(!el.classList.contains('correct-trait')) el.style.border='1px dashed var(--teal)';
+    if(el&&!el.classList.contains('correct-trait')) el.style.border='1px dashed var(--teal)';
   });
-  if(bonus){
-    toast("🎯 Profile Bonus! You read "+state.oppName+" correctly. Peeking hypothesis…","success");
+  if(state.profileBonus){
+    toast("🎯 Profile Bonus! Correct read — peeking hypothesis…","success");
     addLog("Profile bonus! Correct cold read","you");
-    setTimeout(()=>{
-      showPhaseTransition("Phase 4","The Accusation","Name the killer and their motive",()=>renderPhase4(true));
-    },2000);
   } else {
-    const msg=correct.length===1?"1 trait correct – no bonus. Proceeding…":"Both wrong. Proceeding…";
-    toast(msg,"info");
-    setTimeout(()=>{
-      showPhaseTransition("Phase 4","The Accusation","Name the killer and their motive",()=>renderPhase4(false));
-    },2000);
+    toast(correct.length===1?"1 trait correct — no bonus":"Both wrong — proceeding","info");
   }
   sendMsg_raw({type:"profile_submit",traits:state.selectedTraits});
+  setTimeout(()=>showPhaseTransition("Phase 4","The Accusation","Name the killer and their motive",()=>renderPhase4(state.profileBonus)),2000);
 }
 
+// ─── PHASE 4 — ACCUSATION ────────────────────────────────────────────────────
 function renderPhase4(hasBonus){
   state.phase=4;
   updatePhaseLabel("Accusation");
@@ -1030,13 +1042,13 @@ function renderPhase4(hasBonus){
   let motHTML=MOTIVES.map((m,i)=>`
     <div class="motive-btn" id="mot-${i}" onclick="selectMotive(${i})">${m}</div>`).join('');
 
-  let bonusNote=hasBonus?`<div style="background:rgba(26,188,156,.08);border:1px solid var(--teal);border-radius:var(--radius);padding:.6rem .75rem;font-size:.8rem;color:var(--teal2);margin-bottom:1rem;font-family:'JetBrains Mono',monospace">🎁 Profile Bonus: ${state.oppName}'s current hypothesis — <em style="color:var(--text)">"${state.oppHypothesis||state.myHypothesis||'Unknown suspect, unclear motive'}"</em></div>`:'';
+  let bonusNote=hasBonus?`<div style="background:rgba(26,188,156,.08);border:1px solid var(--teal);border-radius:var(--radius);padding:.6rem .75rem;font-size:.8rem;color:var(--teal2);margin-bottom:1rem;font-family:'JetBrains Mono',monospace">🎁 Profile Bonus: ${state.oppName}'s hypothesis — <em style="color:var(--text)">"${state.oppHypothesis||'Unknown — no data yet'}"</em></div>`:'';
 
   mainPanel(`
     <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
       ${[0,1,2,3].map((i)=>`<div class="phase-pip done" id="pip-${i}"></div>`).join('')}
     </div>
-    <div class="phase-label">Phase 4 · The Accusation</div>
+    <div class="phase-label">Phase 4 · The Accusation · Round ${state.round}/${MAX_ROUNDS}</div>
     ${bonusNote}
     <div class="case-card" style="padding:1rem">
       <div class="case-title" style="font-size:1rem;margin-bottom:.75rem">Who is the killer?</div>
@@ -1050,6 +1062,7 @@ function renderPhase4(hasBonus){
     <div id="waiting-opp-msg" style="display:none;text-align:center;color:var(--text3);font-size:.8rem;font-family:'JetBrains Mono',monospace;margin-top:.5rem">Waiting for ${state.oppName}…</div>
   `);
   setPips([0,1,2,3]);
+  selectedSuspectIdx=null;selectedMotiveIdx=null;
 }
 
 let selectedSuspectIdx=null,selectedMotiveIdx=null;
@@ -1065,11 +1078,7 @@ function submitAccusation(){
   if(selectedSuspectIdx===null){toast("Choose a suspect","error");return}
   if(selectedMotiveIdx===null){toast("Choose a motive","error");return}
   const c=state.currentCase;
-  state.myAccusation={
-    suspect:c.suspects[selectedSuspectIdx].name,
-    motive:MOTIVES[selectedMotiveIdx],
-    profileBonus:state.profileBonus
-  };
+  state.myAccusation={suspect:c.suspects[selectedSuspectIdx].name,motive:MOTIVES[selectedMotiveIdx],profileBonus:state.profileBonus};
   document.getElementById('accuse-btn').disabled=true;
   document.getElementById('waiting-opp-msg').style.display='block';
   sendMsg_raw({type:"accusation",suspect:state.myAccusation.suspect,motive:state.myAccusation.motive,profileBonus:state.profileBonus});
@@ -1082,46 +1091,39 @@ function simulateOppAccusation(){
   const c=state.currentCase;
   const suspects=c.suspects.map(s=>s.name);
   const isCorrect=Math.random()>0.4;
-  state.oppAccusation={
-    suspect:isCorrect?c.killer:suspects.find(s=>s!==c.killer),
-    motive:isCorrect?c.motive:MOTIVES[Math.floor(Math.random()*4)]
-  };
+  state.oppAccusation={suspect:isCorrect?c.killer:suspects.find(s=>s!==c.killer),motive:isCorrect?c.motive:MOTIVES[Math.floor(Math.random()*4)]};
   setTimeout(()=>resolveRound(),500);
 }
 
 function resolveRound(){
   const c=state.currentCase;
-  const myCorrectSuspect=state.myAccusation.suspect===c.killer;
-  const myCorrectMotive=state.myAccusation.motive===c.motive;
-  const oppCorrectSuspect=state.oppAccusation&&state.oppAccusation.suspect===c.killer;
-  const oppCorrectMotive=state.oppAccusation&&state.oppAccusation.motive===c.motive;
-
+  const myCS=state.myAccusation.suspect===c.killer;
+  const myCM=state.myAccusation.motive===c.motive;
+  const oppCS=state.oppAccusation&&state.oppAccusation.suspect===c.killer;
+  const oppCM=state.oppAccusation&&state.oppAccusation.motive===c.motive;
   let myPts=0,oppPts=0;
   const breakdown=[];
-
-  if(myCorrectSuspect){myPts+=50;breakdown.push({label:"Correct suspect",val:"+50 pts",you:true})}
-  if(myCorrectMotive){myPts+=30;breakdown.push({label:"Correct motive",val:"+30 pts",you:true})}
+  if(myCS){myPts+=50;breakdown.push({label:"Correct suspect",val:"+50 pts",you:true})}
+  if(myCM){myPts+=30;breakdown.push({label:"Correct motive",val:"+30 pts",you:true})}
   if(state.profileBonus){myPts+=25;breakdown.push({label:"Cold Read bonus",val:"+25 pts",you:true})}
   if(state.myPuzzleTime&&state.oppPuzzleTime&&state.myPuzzleTime<state.oppPuzzleTime){myPts+=10;breakdown.push({label:"Faster puzzle solve",val:"+10 pts",you:true})}
-
-  if(oppCorrectSuspect){oppPts+=50;breakdown.push({label:"Opp correct suspect",val:"+50 pts",you:false})}
-  if(oppCorrectMotive){oppPts+=30;breakdown.push({label:"Opp correct motive",val:"+30 pts",you:false})}
-
-  state.myScore+=myPts;
-  state.oppScore+=oppPts;
+  if(oppCS){oppPts+=50;breakdown.push({label:"Opp correct suspect",val:"+50 pts",you:false})}
+  if(oppCM){oppPts+=30;breakdown.push({label:"Opp correct motive",val:"+30 pts",you:false})}
+  state.myScore+=myPts;state.oppScore+=oppPts;
   updateHeader();
 
-  const c2=c;
-  const revealHTML=c2.suspects.map(s=>`
-    <div class="suspect-card ${s.name===c2.killer?'revealed-correct':'revealed-wrong'}" style="cursor:default">
-      <div class="suspect-name">${s.name}${s.name===c2.killer?` <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--teal)">✓ KILLER</span>`:''}</div>
+  const revealHTML=c.suspects.map(s=>`
+    <div class="suspect-card ${s.name===c.killer?'revealed-correct':'revealed-wrong'}" style="cursor:default">
+      <div class="suspect-name">${s.name}${s.name===c.killer?` <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--teal)">✓ KILLER</span>`:''}</div>
       <div class="suspect-role">${s.role}</div>
     </div>`).join('');
 
+  const isLastRound=state.round>=MAX_ROUNDS;
+
   mainPanel(`
     <div class="case-card">
-      <div class="case-title" style="color:var(--teal2);font-size:1.1rem">Round ${state.round} Resolved</div>
-      <div class="case-location">Killer: ${c2.killer} · Motive: ${c2.motive}</div>
+      <div class="case-title" style="color:var(--teal2);font-size:1.1rem">Round ${state.round}/${MAX_ROUNDS} Resolved</div>
+      <div class="case-location">Killer: ${c.killer} · Motive: ${c.motive}</div>
     </div>
     <div class="accusation-grid">${revealHTML}</div>
     <div style="display:flex;flex-direction:column;gap:.4rem">
@@ -1141,34 +1143,50 @@ function resolveRound(){
         <div style="font-size:1.5rem;font-family:'JetBrains Mono',monospace;color:var(--purple2)">+${oppPts}</div>
       </div>
     </div>
-    <button class="btn btn-gold" style="width:100%" onclick="nextRound()">
-      ${state.round>=3?'End Investigation →':'Next Round →'}
-    </button>
+    <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text3);padding:.5rem">
+      Total: <span style="color:var(--gold2)">${state.myScore}</span> vs <span style="color:var(--purple2)">${state.oppScore}</span> · ${isLastRound?'Final round!':'Round '+(state.round+1)+' of '+MAX_ROUNDS+' up next'}
+    </div>
+    <button class="btn btn-gold" style="width:100%" onclick="nextRound()">${isLastRound?'See Final Results →':'Next Round →'}</button>
   `);
 
   state.myAccusation=null;state.oppAccusation=null;
   state.myPuzzleTime=null;state.oppPuzzleTime=null;
-  state.profileBonus=false;selectedSuspectIdx=null;selectedMotiveIdx=null;
-  selectedPuzzleOpt=null;
+  state.profileBonus=false;selectedPuzzleOpt=null;
+  state.nextRoundLock=false;
 }
 
 function nextRound(){
+  if(state.nextRoundLock) return;
+  state.nextRoundLock=true;
   sendMsg_raw({type:"next_round"});
   advanceRound();
 }
+
 function advanceRound(){
-  if(state.round>=3||state.myScore>=200||state.oppScore>=200){
-    endGame();
-    return;
-  }
+  if(state.round>=MAX_ROUNDS){endGame();return}
   state.round++;
-  state.currentCase=CASES[(state.round-1)%CASES.length];
-  state.mirrorDone=false;
   updateHeader();
+  // Reset per-round state
+  state.mirrorDone=false;
+  state.myHypothesis="";
+  state.oppHypothesis="";
+  state.fakeClue="";state.oppFakeClue="";
+  state.correctionCount=0;
+  state.assignedOppTraits=shuffleArr([...TRAITS]).slice(0,2).map(t=>t.id);
+  // Pick new case (host picks, sends to joiner; solo picks locally)
+  if(!state.isSolo&&state.isHost){
+    const idx=pickNextCase();
+    state.currentCase=CASES[idx];
+    sendMsg_raw({type:"new_case",caseIndex:idx,usedCases:state.usedCaseIndices});
+  } else if(state.isSolo){
+    const idx=pickNextCase();
+    state.currentCase=CASES[idx];
+  }
+  // If joiner, state.currentCase is updated via handleData("new_case")
   showPhaseTransition("Round "+state.round,"New Case","Fresh evidence, fresh suspects",()=>renderPhase1());
 }
 
-// ─── MIRROR ROOM ──────────────────────────────────────────────────────────────
+// ─── MIRROR ROOM (Round 5) ────────────────────────────────────────────────────
 function showMirrorRoom(){
   const hyp=document.getElementById('my-hyp-input')?.value||state.myHypothesis||"No hypothesis recorded yet.";
   state.myHypothesis=hyp;
@@ -1184,7 +1202,7 @@ function submitMirrorRoom(){
   sendMsg_raw({type:"mirror_submit",fakeClue:state.fakeClue,hypothesis:state.myHypothesis});
   if(state.isSolo){
     state.oppFakeClue="The victim knew the delivery driver personally.";
-    state.oppHypothesis="I suspect the cleaner—they never swiped out.";
+    state.oppHypothesis="Suspect: the cleaner — never swiped out of the building.";
     setTimeout(()=>showOppMirror(),500);
   }
 }
@@ -1194,11 +1212,10 @@ function showOppMirror(){
   document.getElementById('mirror-countdown').textContent=countdown;
   document.getElementById('mirror-my-hyp').innerHTML=
     `<strong style="color:var(--purple2);font-family:'JetBrains Mono',monospace;font-size:.75rem">OPPONENT'S BOARD (${state.oppName})</strong><br>`+
-    `<div style="margin-top:.4rem">${state.oppHypothesis||"No hypothesis yet"}</div>`+
-    (state.oppFakeClue?`<div style="margin-top:.4rem;color:var(--red2);font-size:.8rem">🔴 New clue: ${state.oppFakeClue}</div>`:'');
+    `<div style="margin-top:.4rem">${state.oppHypothesis||"No hypothesis recorded"}</div>`+
+    (state.oppFakeClue?`<div style="margin-top:.4rem;color:var(--red2);font-size:.8rem">🔴 Planted clue: ${state.oppFakeClue}</div>`:'');
   document.querySelector('.fake-clue-section').style.display='none';
   document.querySelector('.mirror-box .btn').style.display='none';
-  
   const ci=setInterval(()=>{
     countdown--;
     const el=document.getElementById('mirror-countdown');
@@ -1207,7 +1224,7 @@ function showOppMirror(){
       clearInterval(ci);
       document.getElementById('mirror-overlay').classList.remove('show');
       state.mirrorDone=true;
-      toast("Mirror Room closed. Can you spot the fake clue?","info");
+      toast("Mirror Room closed. Spot the fake clue?","info");
       showPhaseTransition("Phase 2","Puzzle Gate","Solve to unlock critical evidence",()=>renderPhase2());
     }
   },1000);
@@ -1221,46 +1238,32 @@ function startTelemetry(){
     if(state.isSolo) simulateOppTelem();
     updateTelemUI();
   },3000);
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Backspace') state.correctionCount++;
-  });
+  document.addEventListener('keydown',e=>{if(e.key==='Backspace') state.correctionCount++;});
 }
 
 function simulateOppTelem(){
-  state.oppTelem={
-    hesitation:Math.random()*5,
-    corrections:Math.random()*8,
-    puzzleTime:state.oppTelem.puzzleTime||Math.random()*30
-  };
+  state.oppTelem={hesitation:Math.random()*5,corrections:Math.random()*8,puzzleTime:state.oppTelem.puzzleTime||Math.random()*30};
 }
 
 function updateTelemUI(){
-  const my=state.myTelem,op=state.oppTelem;
-  setTelem('you',my);setTelem('opp',op);
+  setTelem('you',state.myTelem);setTelem('opp',state.oppTelem);
 }
 function setTelem(who,t){
-  const s=who==='you'?'you':'opp';
-  const hesEl=document.getElementById('telem-hes-'+s);
-  const corEl=document.getElementById('telem-cor-'+s);
+  const hesEl=document.getElementById('telem-hes-'+who);
+  const corEl=document.getElementById('telem-cor-'+who);
   if(!hesEl) return;
-  const hesVal=Math.min(100,t.hesitation*20);
-  const corVal=Math.min(100,t.corrections*10);
-  hesEl.style.width=hesVal+'%';
-  corEl.style.width=corVal+'%';
-  document.getElementById('telem-hes-'+s+'-v').textContent=t.hesitation?t.hesitation.toFixed(1):'0';
-  document.getElementById('telem-cor-'+s+'-v').textContent=Math.round(t.corrections)||0;
+  hesEl.style.width=Math.min(100,t.hesitation*20)+'%';
+  corEl.style.width=Math.min(100,t.corrections*10)+'%';
+  document.getElementById('telem-hes-'+who+'-v').textContent=t.hesitation?t.hesitation.toFixed(1):'0';
+  document.getElementById('telem-cor-'+who+'-v').textContent=Math.round(t.corrections)||0;
 }
 function updateTelemYouSpeed(t){
-  const pct=Math.max(0,100-t*2);
-  document.getElementById('telem-spd-you').style.width=pct+'%';
+  document.getElementById('telem-spd-you').style.width=Math.max(0,100-t*2)+'%';
   document.getElementById('telem-spd-you-v').textContent=t+'s';
 }
 function updateTelemOppSpeed(t){
-  const pct=Math.max(0,100-t*2);
-  const el=document.getElementById('telem-spd-opp');
-  if(el){el.style.width=pct+'%';}
-  const vel=document.getElementById('telem-spd-opp-v');
-  if(vel) vel.textContent=t+'s';
+  const el=document.getElementById('telem-spd-opp');if(el) el.style.width=Math.max(0,100-t*2)+'%';
+  const vel=document.getElementById('telem-spd-opp-v');if(vel) vel.textContent=t+'s';
 }
 
 // ─── MESSAGING ────────────────────────────────────────────────────────────────
@@ -1274,35 +1277,24 @@ function sendMsg(){
   sendMsg_raw({type:"chat",text:txt});
 }
 function addChatMsg(txt,isMe){
-  const log=document.getElementById('msg-log');
-  if(!log) return;
+  const log=document.getElementById('msg-log');if(!log) return;
   const div=document.createElement('div');
   div.className='msg-item '+(isMe?'you-msg':'opp-msg');
   div.textContent=(isMe?'You':state.oppName)+': '+txt;
-  log.appendChild(div);
-  log.scrollTop=log.scrollHeight;
+  log.appendChild(div);log.scrollTop=log.scrollHeight;
 }
-
 function addLog(text,who){
-  const log=document.getElementById('activity-log');
-  if(!log) return;
-  const div=document.createElement('div');
-  div.className='log-entry';
+  const log=document.getElementById('activity-log');if(!log) return;
+  const div=document.createElement('div');div.className='log-entry';
   const now=new Date();
   const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   div.innerHTML=`<span class="log-time">${t}</span><span class="log-text ${who}">${text}</span>`;
-  log.appendChild(div);
-  log.scrollTop=log.scrollHeight;
+  log.appendChild(div);log.scrollTop=log.scrollHeight;
 }
+function sendStatus(s){sendMsg_raw({type:"opp_status",status:s});}
 
-function sendStatus(s){
-  sendMsg_raw({type:"opp_status",status:s});
-}
-
-// ─── UI HELPERS ──────────────────────────────────────────────────────────────
-function mainPanel(html){
-  document.getElementById('main-panel').innerHTML=html;
-}
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function mainPanel(html){document.getElementById('main-panel').innerHTML=html;}
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -1314,17 +1306,10 @@ function updateHeader(){
   document.getElementById('you-name-hdr').textContent=state.myName;
   document.getElementById('opp-name-hdr').textContent=state.oppName;
 }
-function updatePhaseLabel(label){
-  document.getElementById('hdr-phase-label').textContent=label;
-}
-function updateOppStatus(s){
-  const el=document.getElementById('opp-status-text');
-  if(el) el.textContent=s;
-}
+function updatePhaseLabel(label){document.getElementById('hdr-phase-label').textContent=label;}
 function setPips(donePips){
   [0,1,2,3].forEach(i=>{
-    const el=document.getElementById('pip-'+i);
-    if(!el) return;
+    const el=document.getElementById('pip-'+i);if(!el) return;
     el.className='phase-pip'+(donePips.includes(i)?' done':'');
   });
 }
@@ -1338,18 +1323,14 @@ function showPhaseTransition(number,name,sub,cb){
 }
 function toast(msg,type='info'){
   const c=document.getElementById('toasts');
-  const d=document.createElement('div');
-  d.className='toast '+type;
-  d.textContent=msg;
-  c.appendChild(d);
-  setTimeout(()=>d.remove(),3200);
+  const d=document.createElement('div');d.className='toast '+type;d.textContent=msg;
+  c.appendChild(d);setTimeout(()=>d.remove(),3200);
 }
 function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 // ─── END GAME ─────────────────────────────────────────────────────────────────
 function endGame(){
-  clearInterval(state.telemInterval);
-  clearInterval(state.timerInterval);
+  clearInterval(state.telemInterval);clearInterval(state.timerInterval);
   showScreen('result-screen');
   const won=state.myScore>state.oppScore;
   const tied=state.myScore===state.oppScore;
@@ -1361,6 +1342,7 @@ function endGame(){
     <div class="result-row"><span class="result-row-label">Rounds played</span><span class="result-row-val">${state.round}</span></div>
     <div class="result-row"><span class="result-row-label">Your score</span><span class="result-row-val">${state.myScore} pts</span></div>
     <div class="result-row"><span class="result-row-label">${state.oppName}'s score</span><span class="result-row-val">${state.oppScore} pts</span></div>
+    <div class="result-row"><span class="result-row-label">Max possible</span><span class="result-row-val">${MAX_ROUNDS*115} pts</span></div>
   `;
 }
 
