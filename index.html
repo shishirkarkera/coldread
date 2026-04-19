@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cold Read — Detective Duel</title>
+<title>Logic Duel — Puzzle Arena</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -60,20 +60,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .game-body{display:grid;grid-template-columns:1fr 320px;height:calc(100vh - 56px);overflow:hidden}
 .main-panel{overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;-webkit-overflow-scrolling:touch}
 .side-panel{border-left:1px solid var(--border);overflow-y:auto;padding:1.2rem;display:flex;flex-direction:column;gap:1rem;background:var(--surface);-webkit-overflow-scrolling:touch}
-.phase-bar{display:flex;gap:.5rem;margin-bottom:.5rem}
-.phase-pip{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .4s}
-.phase-pip.done{background:var(--teal)}.phase-pip.active{background:var(--gold2)}
-.phase-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
-.case-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem;padding-top:calc(1.25rem + 3px);position:relative}
-.case-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--amber));border-radius:var(--radius2) var(--radius2) 0 0;z-index:1}
-.case-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold2);margin-bottom:.25rem}
-.case-location{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
-.case-body{font-size:.9rem;line-height:1.7;color:var(--text2)}
-.clue-list{display:flex;flex-direction:column;gap:.5rem;margin-top:1rem}
-.clue-item{display:flex;gap:.75rem;align-items:flex-start;padding:.6rem;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);font-size:.85rem;color:var(--text)}
-.clue-icon{font-size:1rem;flex-shrink:0;margin-top:.05rem}
-.clue-text{line-height:1.5}
-.noise-tag{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--red2);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);border-radius:4px;padding:.1rem .3rem;margin-left:.4rem}
+.panel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem;padding-top:calc(1.25rem + 3px);position:relative}
+.panel-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--amber));border-radius:var(--radius2) var(--radius2) 0 0;z-index:1}
+.panel-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold2);margin-bottom:.25rem}
 
 /* ── PUZZLE CARD ── */
 .puzzle-card{background:var(--surface);border:1px solid var(--gold);border-radius:var(--radius2);padding:1.25rem;animation:glow-border 2s ease-in-out infinite}
@@ -83,10 +72,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .timer-circle{position:relative;width:52px;height:52px}
 .timer-svg{transform:rotate(-90deg)}
 .timer-track{fill:none;stroke:var(--border2);stroke-width:4}
-.timer-fill{fill:none;stroke:var(--gold2);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .1s linear,stroke .5s}
+.timer-fill{fill:none;stroke:var(--gold2);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .5s}
 .timer-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--gold2)}
-.puzzle-question{font-size:.9rem;color:var(--text);margin-bottom:1rem;line-height:1.65}
-.puzzle-hint-box{background:rgba(230,126,34,.07);border:1px solid rgba(230,126,34,.25);border-radius:var(--radius);padding:.5rem .85rem;font-size:.8rem;color:var(--amber2);font-family:'JetBrains Mono',monospace;margin-bottom:.85rem}
+.puzzle-question{font-size:.95rem;color:var(--text);margin-bottom:1rem;line-height:1.65;font-weight:500;}
 .puzzle-options{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem}
 .puzzle-opt{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.65rem .75rem;cursor:pointer;font-size:.83rem;color:var(--text);text-align:center;transition:all .2s;line-height:1.4}
 .puzzle-opt:hover{border-color:var(--gold);color:var(--gold)}
@@ -94,16 +82,18 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .puzzle-opt.correct{background:rgba(26,188,156,.1);border-color:var(--teal);color:var(--teal)}
 .puzzle-opt.wrong{background:rgba(192,57,43,.1);border-color:var(--red);color:var(--red)}
 
-/* ── CIPHER INPUT ── */
-.cipher-input-row{display:flex;gap:.5rem;margin-bottom:.75rem}
-.cipher-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.6rem 1rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;transition:border .2s;text-transform:uppercase;letter-spacing:.08em}
-.cipher-input:focus{border-color:var(--gold)}
-.cipher-check-btn{background:var(--gold);color:#000;border:none;border-radius:var(--radius);padding:.6rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap}
-.cipher-check-btn:hover{background:var(--gold2)}
-.cipher-feedback{font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:.5rem .75rem;border-radius:var(--radius);margin-bottom:.5rem;display:none}
-.cipher-feedback.show{display:block}
-.cipher-feedback.ok{background:rgba(26,188,156,.1);border:1px solid var(--teal);color:var(--teal2)}
-.cipher-feedback.bad{background:rgba(192,57,43,.1);border:1px solid var(--red);color:var(--red2)}
+/* ── CIPHER / UNSCRAMBLE INPUT ── */
+.text-input-row{display:flex;gap:.5rem;margin-bottom:.75rem}
+.text-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.6rem 1rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;transition:border .2s;text-transform:uppercase;letter-spacing:.08em}
+.text-input:focus{border-color:var(--gold)}
+.text-check-btn{background:var(--gold);color:#000;border:none;border-radius:var(--radius);padding:.6rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.text-check-btn:hover{background:var(--gold2)}
+.text-feedback{font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:.5rem .75rem;border-radius:var(--radius);margin-bottom:.5rem;display:none}
+.text-feedback.show{display:block}
+.text-feedback.ok{background:rgba(26,188,156,.1);border:1px solid var(--teal);color:var(--teal2)}
+.text-feedback.bad{background:rgba(192,57,43,.1);border:1px solid var(--red);color:var(--red2)}
+.scramble-display{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.85rem;justify-content:center}
+.scramble-letter{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.5rem .7rem;font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:600;color:var(--gold2);min-width:38px;text-align:center;letter-spacing:.05em}
 
 /* ── NUMBER SEQUENCE ── */
 .seq-display{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem;align-items:center}
@@ -115,58 +105,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .seq-opt.selected{background:rgba(201,162,39,.15);border-color:var(--gold2)}
 .seq-opt.correct{background:rgba(26,188,156,.1);border-color:var(--teal);color:var(--teal)}
 .seq-opt.wrong{background:rgba(192,57,43,.1);border-color:var(--red);color:var(--red)}
-
-/* ── LOGIC GRID ── */
-.logic-grid-table{width:100%;border-collapse:collapse;font-size:.82rem;font-family:'JetBrains Mono',monospace;margin-bottom:.85rem}
-.logic-grid-table th{background:var(--surface3);color:var(--text3);padding:.45rem .6rem;border:1px solid var(--border);text-align:center;font-size:.72rem;letter-spacing:.06em}
-.logic-grid-table td{border:1px solid var(--border);padding:.4rem .6rem;text-align:center;cursor:pointer;transition:background .15s;color:var(--text2)}
-.logic-grid-table td.lgtick{background:rgba(26,188,156,.15);color:var(--teal);font-weight:600}
-.logic-grid-table td.lgcross{background:rgba(192,57,43,.08);color:var(--red2)}
-.logic-grid-table td.lghover:hover{background:rgba(201,162,39,.08);color:var(--gold2)}
-.logic-grid-table tr td:first-child{background:var(--surface3);color:var(--text3);cursor:default;text-align:left;padding-left:.75rem}
-
-/* ── WORD UNSCRAMBLE ── */
-.scramble-display{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.85rem;justify-content:center}
-.scramble-letter{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.5rem .7rem;font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:600;color:var(--gold2);min-width:38px;text-align:center;letter-spacing:.05em}
-.unscramble-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.65rem 1rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1.1rem;outline:none;transition:border .2s;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:.5rem}
-.unscramble-input:focus{border-color:var(--gold)}
-
-/* ── DEDUCTION ── */
-.deduction-clues{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.85rem}
-.deduction-clue-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .75rem;font-size:.83rem;color:var(--text);line-height:1.5}
-.deduction-clue-item .clue-num{font-family:'JetBrains Mono',monospace;color:var(--gold3);font-size:.72rem;margin-right:.4rem}
-
-/* ── UNLOCKED CLUE ── */
-.unlocked-clue{background:rgba(26,188,156,.08);border:1px solid var(--teal);border-radius:var(--radius);padding:.75rem;font-size:.85rem;color:var(--teal2);display:none;animation:fadeIn .5s ease}
-.unlocked-clue.show{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-
-.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem}
-.profile-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--purple2);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
-.trait-grid{display:flex;flex-direction:column;gap:.5rem}
-.trait-item{display:flex;align-items:center;gap:.75rem;padding:.6rem;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:all .2s}
-.trait-item:hover{border-color:var(--purple2)}
-.trait-item.selected{background:rgba(142,68,173,.1);border-color:var(--purple2)}
-.trait-item.correct-trait{background:rgba(26,188,156,.1);border-color:var(--teal)}
-.trait-item.wrong-trait{background:rgba(192,57,43,.1);border-color:var(--red);opacity:.5}
-.trait-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem}
-.trait-item.selected .trait-check,.trait-item.correct-trait .trait-check{background:var(--purple2);border-color:var(--purple2);color:#fff}
-.trait-item.correct-trait .trait-check{background:var(--teal);border-color:var(--teal)}
-.trait-label{font-size:.82rem;color:var(--text);line-height:1.3}
-.trait-sub{font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
-.accusation-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
-.suspect-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);padding:.85rem;cursor:pointer;transition:all .2s;text-align:center}
-.suspect-card:hover{border-color:var(--gold)}
-.suspect-card.selected{background:rgba(201,162,39,.08);border-color:var(--gold2)}
-.suspect-card.revealed-correct{background:rgba(26,188,156,.1);border-color:var(--teal);animation:flash-correct .4s ease}
-.suspect-card.revealed-wrong{background:rgba(192,57,43,.08);border-color:var(--red);opacity:.6}
-@keyframes flash-correct{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
-.suspect-name{font-weight:500;font-size:.9rem;color:var(--text);margin-bottom:.2rem}
-.suspect-role{font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
-.motive-select{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
-.motive-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.5rem;font-size:.8rem;color:var(--text2);cursor:pointer;transition:all .2s;text-align:center}
-.motive-btn:hover{border-color:var(--amber2);color:var(--amber2)}
-.motive-btn.selected{background:rgba(230,126,34,.1);border-color:var(--amber2);color:var(--amber2)}
 
 .side-section{display:flex;flex-direction:column;gap:.5rem}
 .side-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;border-bottom:1px solid var(--border);padding-bottom:.4rem}
@@ -218,7 +156,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
   .game-body{grid-template-columns:1fr;grid-template-rows:auto auto;height:auto;overflow:visible}
   .main-panel{overflow-y:visible;padding:1rem;padding-bottom:1.5rem;min-height:0;height:auto}
   .side-panel{border-left:none;border-top:1px solid var(--border);overflow-y:visible;height:auto;max-height:none}
-  .accusation-grid{grid-template-columns:1fr}.motive-select{grid-template-columns:1fr}
   .puzzle-options{grid-template-columns:1fr}.seq-opts{grid-template-columns:repeat(2,1fr)}
   .game-header{flex-wrap:wrap;gap:.5rem;padding:.5rem 1rem}
   .round-info{gap:.5rem}.score-val{font-size:.95rem}
@@ -232,15 +169,15 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 <div class="toast-container" id="toasts"></div>
 
 <div class="screen active" id="lobby-screen">
-  <div class="game-title"><span class="title-cold">Cold</span> <span class="title-read">Read</span></div>
-  <div class="title-sub">Detective Duel · EQ × IQ · 10 Rounds</div>
+  <div class="game-title"><span class="title-cold">Logic</span> <span class="title-read">Duel</span></div>
+  <div class="title-sub">Pure Puzzle Arena · Speed × Intellect · 10 Rounds</div>
   <div class="lobby-panel">
     <div>
       <h2>Connect to Opponent</h2>
       <p style="font-size:.82rem;color:var(--text3);margin-top:.3rem">Share your ID or paste theirs</p>
     </div>
     <div class="input-group">
-      <label>Your Detective ID</label>
+      <label>Your Player ID</label>
       <div id="my-peer-id" class="peer-id-display" onclick="copyMyId()">Generating…</div>
       <div class="copy-hint">Click to copy · Share this with your opponent</div>
     </div>
@@ -250,7 +187,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
     <hr class="divider">
     <div class="input-group">
       <label>Your Name</label>
-      <input type="text" id="my-name" placeholder="Detective Smith" maxlength="20">
+      <input type="text" id="my-name" placeholder="Player 1" maxlength="20">
     </div>
     <div class="input-group">
       <label>Opponent's ID</label>
@@ -273,10 +210,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 <div class="screen" id="game-screen">
   <div class="game-layout">
     <div class="game-header">
-      <div class="game-header-title">Cold Read</div>
+      <div class="game-header-title">Logic Duel</div>
       <div class="round-info">
         <div class="round-badge">Round <span id="hdr-round">1</span>/10</div>
-        <div class="round-badge" id="hdr-phase-label">Phase 1</div>
       </div>
       <div class="score-display">
         <div class="score-item">
@@ -306,16 +242,16 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
         </div>
         <div class="side-section">
           <div class="side-label">Opponent Status</div>
-          <div class="opp-status" id="opp-status-box"><span class="status-dot" style="color:var(--amber2)"></span><span id="opp-status-text">Reviewing case file…</span></div>
+          <div class="opp-status" id="opp-status-box"><span class="status-dot" style="color:var(--amber2)"></span><span id="opp-status-text">Solving puzzle…</span></div>
         </div>
         <div class="side-section">
-          <div class="side-label">Puzzle Types This Game</div>
+          <div class="side-label">Puzzle Pool</div>
           <div id="puzzle-type-legend" style="display:flex;flex-direction:column;gap:.3rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text3)">
-            <div>🔢 Number Sequence</div>
-            <div>🔤 Caesar Cipher (shift 1)</div>
-            <div>🧩 Logic Deduction</div>
-            <div>🔀 Word Unscramble</div>
-            <div>📋 Multi-choice Logic</div>
+            <div>🧮 Math & Logic (30 variants)</div>
+            <div>🔢 Number Sequence (30 variants)</div>
+            <div>🔤 Caesar Cipher (30 variants)</div>
+            <div>🔀 Word Unscramble (30 variants)</div>
+            <div style="color:var(--gold3);margin-top:4px">Game selects 10 random</div>
           </div>
         </div>
         <div class="side-section">
@@ -323,7 +259,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
           <div class="activity-log" id="activity-log"></div>
         </div>
         <div class="side-section">
-          <div class="side-label">Secure Channel</div>
+          <div class="side-label">Chat</div>
           <div class="msg-log" id="msg-log"></div>
           <div class="msg-input-row">
             <input type="text" class="msg-input" id="msg-input" placeholder="Send a message…" maxlength="80" onkeydown="if(event.key==='Enter')sendMsg()">
@@ -337,353 +273,159 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 
 <div class="screen" id="result-screen">
   <div class="result-box">
-    <div class="result-title" id="result-title">Case Closed</div>
+    <div class="result-title" id="result-title">Match Complete</div>
     <div style="font-size:.85rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:.25rem" id="result-subtitle"></div>
     <div class="result-score-big" id="result-score-big"></div>
     <div class="result-breakdown" id="result-breakdown"></div>
-    <button class="btn btn-gold" style="width:100%;margin-top:1rem" onclick="location.reload()">New Investigation</button>
+    <button class="btn btn-gold" style="width:100%;margin-top:1rem" onclick="location.reload()">New Duel</button>
   </div>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════════
-// PUZZLE LIBRARY — 6 distinct types, 10+ instances
+// PROCEDURAL PUZZLE ENGINE (Generates 120 unique puzzles)
 // ══════════════════════════════════════════════════════
-const PUZZLE_TYPES = {
-  MCQ:'mcq', SEQ:'sequence', CIPHER:'cipher',
-  LOGIC:'logic', UNSCRAMBLE:'unscramble', DEDUCTION:'deduction'
-};
+const PUZZLE_TYPES = { MATH:'math', SEQ:'sequence', CIPHER:'cipher', UNSCRAMBLE:'unscramble' };
+let ALL_PUZZLES = [];
 
-const ALL_PUZZLES = [
-  // ── NUMBER SEQUENCES (Original + Indexx Additions) ────────────────
-  {
-    kind:PUZZLE_TYPES.SEQ, label:"Number Sequence",
-    question:"What is the next number in the sequence?\n\n2 · 4 · 8 · 16 · 32 · ?",
-    hint:"Each number is multiplied by 2",
-    sequence:[2,4,8,16,32], answer:"64",
-    options:["48","56","64","72"],correct:2,
-    unlocks:"Pattern confirmed: victim's safe combination uses powers of 2. Last digit is 64."
-  },
-  {
-    kind:PUZZLE_TYPES.SEQ, label:"Number Sequence",
-    question:"What is the next number in the sequence?\n\n3 · 6 · 11 · 18 · 27 · ?",
-    hint:"Look at the gaps between numbers: +3, +5, +7, +9…",
-    sequence:[3,6,11,18,27], answer:"38",
-    options:["34","36","38","40"],correct:2,
-    unlocks:"The code gaps matched the killer's entry intervals. Next expected time: 38 minutes past."
-  },
-  {
-    kind:PUZZLE_TYPES.SEQ, label:"Number Sequence",
-    question:"What is the missing number?\n\n1 · 4 · 9 · 16 · ? · 36",
-    hint:"These are perfect squares: 1², 2², 3²…",
-    sequence:[1,4,9,16,'?',36], answer:"25",
-    options:["20","23","25","28"],correct:2,
-    unlocks:"The victim's filing system used square numbers. The missing file is folder 25."
-  },
-  {
-    kind:PUZZLE_TYPES.SEQ, label:"Number Sequence",
-    question:"What is the next number in the sequence?\n\n1 · 1 · 2 · 3 · 5 · 8 · ?",
-    hint:"Each number is the sum of the two preceding ones (Fibonacci).",
-    sequence:[1,1,2,3,5,8], answer:"13",
-    options:["10","11","12","13"],correct:3,
-    unlocks:"The corrupted CCTV timestamp confirms the suspect's presence at 3:33 AM."
-  },
-  {
-    kind:PUZZLE_TYPES.SEQ, label:"Number Sequence",
-    question:"What is the missing number?\n\n2 · 6 · 12 · 20 · ?",
-    hint:"Think of multiplying consecutive numbers (1x2, 2x3, 3x4...).",
-    sequence:[2,6,12,20], answer:"30",
-    options:["24","28","30","36"],correct:2,
-    unlocks:"Fisherman's log confirms a yacht was near the lighthouse rocks at the exact time."
-  },
-  {
-    kind:PUZZLE_TYPES.SEQ, label:"Number Sequence",
-    question:"What comes next?\n\n5 · 10 · 17 · 26 · 37 · ?",
-    hint:"Look at the gaps: +5, +7, +9, +11... or squares plus one (n²+1).",
-    sequence:[5,10,17,26,37], answer:"50",
-    options:["48","50","52","55"],correct:1,
-    unlocks:"The witness statement matches the suspect's timeline near the sacristy perfectly."
-  },
-  {
-    kind:PUZZLE_TYPES.SEQ, label:"Number Sequence",
-    question:"Find the next number:\n\n11 · 22 · 33 · 44 · 55 · ?",
-    hint:"These are multiples of 11.",
-    sequence:[11,22,33,44,55], answer:"66",
-    options:["60","66","70","77"],correct:1,
-    unlocks:"The tranquilizer batch number traced back to a specific local veterinary clinic."
-  },
-
-  // ── CAESAR CIPHER (Strictly Shift 1) ───────────────────────────────
-  {
-    kind:PUZZLE_TYPES.CIPHER, label:"Caesar Cipher (Shift 1)",
-    question:'Decode this message found on the victim\'s desk.\nEach letter has been shifted forward by 1.\n\n"UIF CVUMFS EJE JU"',
-    hint:"Shift each letter BACK by 1  (B→A, F→E, etc.)",
-    answer:"THE BUTLER DID IT",
-    unlocks:"Decoded note confirms the victim suspected the butler and wrote it down as a cipher for protection."
-  },
-  {
-    kind:PUZZLE_TYPES.CIPHER, label:"Caesar Cipher (Shift 1)",
-    question:'Decode the encrypted text message found on a burner phone.\nShift: +1 (shift each letter back by 1 to decode)\n\n"NFFU BU NJEOHJIU"',
-    hint:"A→Z shift back: N→M, F→E, F→E, U→T…",
-    answer:"MEET AT MIDNIGHT",
-    unlocks:"The rendezvous was planned for midnight. This confirms the alibi is false."
-  },
-  {
-    kind:PUZZLE_TYPES.CIPHER, label:"Caesar Cipher (Shift 1)",
-    question:'Decode this intercepted harbor message.\nShift: +1 (shift each letter back by 1 to decode)\n\n"UIF CPBU DPNFT BU NJEOJHIU"',
-    hint:"Shift each letter BACK by 1 (B→A, F→E, etc.)",
-    answer:"THE BOAT COMES AT MIDNIGHT",
-    unlocks:"The message confirms the rendezvous time. The smuggling operation was planned for 12:00 AM."
-  },
-  {
-    kind:PUZZLE_TYPES.CIPHER, label:"Caesar Cipher (Shift 1)",
-    question:'Decode the text found on a corrupted storage drive.\nCaesar shift: +1 applied to original\n\n"UIF USBOTQPSUFS LOPXT UIF SPBE"',
-    hint:"Work letter by letter, shifting each one back by 1 in the alphabet",
-    answer:"THE TRANSPORTER KNOWS THE ROAD",
-    unlocks:"The decrypted file proves the cold chain transporter was involved in moving the illicit goods."
-  },
-  {
-    kind:PUZZLE_TYPES.CIPHER, label:"Caesar Cipher (Shift 1)",
-    question:'A coded entry in the chapel visitor log.\nEncoded with Caesar +1 shift.\n\n"UIF QSJFTU XBT UIF MBTU UP MFBWF"',
-    hint:"A→Z shift back: U→T, I→H, F→E...",
-    answer:"THE PRIEST WAS THE LAST TO LEAVE",
-    unlocks:"Log confirms the timeline. The priest had exclusive access to the archives before the theft."
-  },
-
-  // ── LOGIC DEDUCTION (Originals kept intact) ─────────────────────────
-  {
-    kind:PUZZLE_TYPES.DEDUCTION, label:"Logic Deduction",
-    question:"Three suspects were interviewed. Use the clues to find who is lying.\n\nClue 1: Exactly one person is lying.\nClue 2: Arjun says 'I was at home.'\nClue 3: Priya says 'Arjun was NOT at home.'\nClue 4: Ravi says 'Priya is telling the truth.'\n\nWho is the liar?",
-    hint:"If Arjun tells the truth → Priya lies → Ravi also lies. That's two liars. Try Arjun lying.",
-    clues:[
-      "Exactly one person is lying",
-      "Arjun says: 'I was at home'",
-      "Priya says: 'Arjun was NOT at home'",
-      "Ravi says: 'Priya is telling the truth'"
-    ],
-    answer:"ARJUN",
-    options:["Arjun — contradicted by both Priya and Ravi","Priya — Arjun and Ravi agree against her","Ravi — his statement creates a paradox","No one — all are telling the truth"],
-    correct:0,
-    unlocks:"Arjun lied about his alibi. If Arjun lied → Priya is truthful → Ravi is truthful. Exactly one liar: Arjun."
-  },
-  {
-    kind:PUZZLE_TYPES.DEDUCTION, label:"Logic Deduction",
-    question:"Four witnesses each saw the killer from a different angle. Use logic to identify the guilty party.\n\nFacts:\n• The killer wore a red jacket.\n• Witness A: 'The person had dark hair and a red jacket.'\n• Witness B: 'The person had light hair.'\n• Witness C: 'Witness B is lying.'\n• Witness D: 'The person wore blue, not red.'\n• Witnesses A and C are both honest.\n\nWhat colour jacket did the killer wear?",
-    hint:"A and C are honest. C says B lies → B is dishonest. A says red jacket → red is true.",
-    clues:[
-      "Killer wore a red jacket (given)",
-      "Witness A (honest): dark hair + red jacket",
-      "Witness B: light hair",
-      "Witness C (honest): Witness B is lying",
-      "Witness D: blue jacket (not confirmed)"
-    ],
-    answer:"RED",
-    options:["Red — confirmed by honest Witness A","Blue — Witness D's account","Both — conflicting testimony","Cannot determine from evidence"],
-    correct:0,
-    unlocks:"Red jacket confirmed. Witness A's honest testimony overrules D. Suspect with dark hair and red jacket is the killer."
-  },
-
-  // ── WORD UNSCRAMBLE (Originals kept intact) ─────────────────────────
-  {
-    kind:PUZZLE_TYPES.UNSCRAMBLE, label:"Word Unscramble",
-    question:"Unscramble this word found written on the back of the victim's business card.\nThe word is a key piece of evidence.\n\nScrambled: VENOMIS",
-    hint:"It's a 7-letter word meaning a dangerous liquid substance",
-    scrambled:"VENOMIS", answer:"VOMINES",
-    realAnswer:"VENOMS",
-    displayScrambled:"V · E · N · O · M · I · S",
-    options:["VOMINES","VENOMIS","ENVIMOS","VENOMS"],correct:3,
-    unlocks:"VENOMS — the victim had written a warning about a poisonous substance. Toxicology now confirms the cause of death."
-  },
-  {
-    kind:PUZZLE_TYPES.UNSCRAMBLE, label:"Word Unscramble",
-    question:"A torn label was found at the crime scene with a scrambled word.\nUnscramble it to identify a key location.\n\nScrambled: TORHBRA",
-    hint:"7 letters — a place where boats are kept",
-    scrambled:"TORHBRA", answer:"HARBOUR",
-    displayScrambled:"T · O · R · H · B · R · A",
-    options:["HARBOUR","RATHROB","BOATHAR","BARTHOR"],correct:0,
-    unlocks:"HARBOUR — the meeting took place at the harbour, consistent with the witness who heard boat sounds at 2 AM."
-  },
-
-  // ── MCQ LOGIC (Originals kept intact) ───────────────────────────────
-  {
-    kind:PUZZLE_TYPES.MCQ, label:"Timeline Logic",
-    question:"The victim was last seen alive at 9:00 PM.\nThe coroner estimates death occurred 2–3 hours later.\nCCTV shows the building entrance empty after 10:30 PM.\n\nWhat is the LATEST possible time of death that still fits all the evidence?",
-    hint:"Death = 2–3 hrs after 9 PM. Latest = 9 PM + 3 hrs = midnight. But building empty after 10:30 PM — does that matter?",
-    options:["10:30 PM — when building went empty","11:00 PM — one hour margin","Midnight — 3 hours after last sighting","9:30 PM — earliest window"],
-    answer:"MIDNIGHT",correct:2,
-    unlocks:"Midnight is the latest possible time of death. The empty building doesn't cap it — the killer may have already been inside."
+function generateAllPuzzles() {
+  ALL_PUZZLES = [];
+  
+  // 1. Math & Logic (30 puzzles)
+  for(let i=0; i<30; i++) {
+    let type = Math.floor(Math.random() * 3);
+    if(type === 0) { // Algebra System
+      let a = Math.floor(Math.random() * 10) + 2;
+      let b = Math.floor(Math.random() * 10) + 2;
+      let sum = a + b; let diff = Math.abs(a - b);
+      let isA = Math.random() > 0.5;
+      ALL_PUZZLES.push({
+        kind: PUZZLE_TYPES.MATH, label: "Algebra Logic",
+        question: `Solve for ${isA ? 'X' : 'Y'}:\n\nX + Y = ${sum}\n|X - Y| = ${diff}\nGiven X > Y`,
+        options: [a.toString(), b.toString(), (sum+1).toString(), diff.toString()],
+        correct: isA ? (a>b?0:1) : (a<b?0:1),
+        answer: isA ? Math.max(a,b).toString() : Math.min(a,b).toString(),
+        timeLimit: 45
+      });
+    } else if(type === 1) { // Ratios
+      let ratio = Math.floor(Math.random() * 4) + 2;
+      let total = (ratio + 1) * (Math.floor(Math.random() * 5) + 2);
+      let smaller = total / (ratio + 1); let larger = smaller * ratio;
+      ALL_PUZZLES.push({
+        kind: PUZZLE_TYPES.MATH, label: "Ratio Problem",
+        question: `A and B share ${total} coins. A gets ${ratio} times as many as B.\nHow many does A get?`,
+        options: [larger.toString(), smaller.toString(), (larger+2).toString(), (total-smaller+1).toString()],
+        correct: 0, answer: larger.toString(), timeLimit: 45
+      });
+    } else { // Multiplier Logic
+      let base = Math.floor(Math.random() * 5) + 3;
+      let mult = Math.floor(Math.random() * 3) + 2;
+      let res = base * mult;
+      ALL_PUZZLES.push({
+        kind: PUZZLE_TYPES.MATH, label: "Arithmetic Logic",
+        question: `If ${base} widgets cost $${res}, how much do ${base*2} widgets cost?`,
+        options: [(res*2).toString(), (res*2+2).toString(), (res*1.5).toString(), (res*3).toString()],
+        correct: 0, answer: (res*2).toString(), timeLimit: 40
+      });
+    }
   }
-];
 
-// ── CASES ────────────────────────────────────────────────────────────────────
-const CASES = [
-  {
-    id:1,title:"The Kadri Park Incident",location:"Mangaluru · Kadri Park Area",
-    text:"A retired professor was found dead at 11 PM in their apartment near Kadri Park. The neighbour heard loud arguing at 9 PM. Security logs show three visitors that evening: a delivery driver at 8:30 PM, a childhood friend at 9:15 PM, and a house cleaner at 10:45 PM. The victim's phone shows a wiped call log. Most strangely, the window was forced open — but from the inside.",
-    clues:[
-      {icon:"📦",text:"Delivery driver logged out at 8:52 PM — confirmed via app GPS",noise:false},
-      {icon:"📱",text:"Deleted calls were to a private number registered in Mumbai",noise:false},
-      {icon:"🪟",text:"Window forced from inside — suggests a staged break-in",noise:false},
-      {icon:"🌧️",text:"Rain started at 9:30 PM — outdoor footprints washed away",noise:true},
-      {icon:"🧹",text:"Cleaner's keycard shows entry at 10:45 PM, exit never recorded",noise:false},
-      {icon:"📺",text:"TV was still on — neighbours said victim always turned it off at 9",noise:true},
-    ],
-    suspects:[{name:"Priya Nair",role:"Childhood Friend"},{name:"Rajan Shetty",role:"House Cleaner"},{name:"Karim Hussain",role:"Delivery Driver"},{name:"Meena Kamath",role:"Neighbour"}],
-    killer:"Rajan Shetty",motive:"Greed"
-  },
-  {
-    id:2,title:"The Udupi Hotel Murder",location:"Udupi · Malpe Beach Resort",
-    text:"A businessman was found dead in his resort room. The do-not-disturb sign was out all morning. His food delivery history shows an order for two people at 11 PM. His laptop was wiped, but router logs show two devices in the room that night. His business partner was seen in the lobby at 10:40 PM — nine minutes before the camera cut out.",
-    clues:[
-      {icon:"🍱",text:"Delivery order: 2 biryanis, 2 drinks — clearly ordered for two",noise:false},
-      {icon:"📡",text:"Router logs: 2 devices — victim's phone and an unregistered tablet",noise:false},
-      {icon:"💼",text:"Business partner claims he left at 10:50 PM — lobby camera cuts at 10:48",noise:false},
-      {icon:"🌊",text:"High tide that night — beach access near the hotel was flooded",noise:true},
-      {icon:"💻",text:"Laptop wiped with consumer-grade software — not a professional job",noise:false},
-      {icon:"🔑",text:"Room service record shows a second keycard issued at 10:30 PM",noise:false},
-    ],
-    suspects:[{name:"Anand Pai",role:"Business Partner"},{name:"Deepa Rao",role:"Hotel Manager"},{name:"Thomas Mathew",role:"Room Service Staff"},{name:"Sunita Bhat",role:"Wife"}],
-    killer:"Anand Pai",motive:"Greed"
-  },
-  {
-    id:3,title:"The Lighthouse Disappearance",location:"Mangaluru · Old Port District",
-    text:"A journalist investigating port corruption vanished after filing her latest story. Her voice recorder was found at the base of the old lighthouse at midnight. The recording ends mid-sentence — footsteps audible, then silence. Three port officials had clear motive. Her editor received a threatening encrypted email 48 hours before she disappeared.",
-    clues:[
-      {icon:"🎙️",text:"Recording ends at 11:57 PM — approaching footsteps, then silence",noise:false},
-      {icon:"📧",text:"Threatening email traced to a café near the port authority office",noise:false},
-      {icon:"⚓",text:"Port official Reddy's badge scanned at the port gate at 11:45 PM",noise:false},
-      {icon:"🌙",text:"Cloudy night — lighthouse beam operational, poor visibility below",noise:true},
-      {icon:"📋",text:"Journalist's notes mention a 'midnight meeting' with an unnamed source",noise:false},
-      {icon:"🚗",text:"Taxi records: pickup 200m from lighthouse at 12:15 AM — passenger unknown",noise:false},
-    ],
-    suspects:[{name:"Venkat Reddy",role:"Port Official"},{name:"Sarah D'Souza",role:"Editor"},{name:"Mohammed Farooq",role:"Dock Supervisor"},{name:"Lila Menon",role:"Corrupt Lawyer"}],
-    killer:"Venkat Reddy",motive:"Protection"
-  },
-  {
-    id:4,title:"The Curator's Last Exhibition",location:"Bengaluru · Lalbagh Art Gallery",
-    text:"A renowned art curator was found poisoned in the private viewing room after the gallery closed. The poison was in her evening tea. Three people had after-hours access: her assistant, a visiting artist, and the gallery's head of security. A priceless miniature painting went missing the same night. The assistant claims he left at 8 PM but his umbrella was found inside at 10 PM.",
-    clues:[
-      {icon:"☕",text:"Poison identified as aconitine — odourless, tasteless, slow-acting",noise:false},
-      {icon:"🖼️",text:"Missing miniature valued at ₹2.4 crore — recently appraised by the victim",noise:false},
-      {icon:"☂️",text:"Assistant's umbrella found in private room — he claims he left at 8 PM",noise:false},
-      {icon:"🌧️",text:"Heavy rain that night — the gallery's skylight was leaking",noise:true},
-      {icon:"🔐",text:"Security logs show the head's keycard used at 10:22 PM in the storage wing",noise:false},
-      {icon:"🎨",text:"Visiting artist had a prior dispute with the curator over attribution rights",noise:false},
-    ],
-    suspects:[{name:"Arjun Nair",role:"Assistant Curator"},{name:"Francesca Britto",role:"Visiting Artist"},{name:"Suresh Pillai",role:"Head of Security"},{name:"Riya Desai",role:"Gallery Trustee"}],
-    killer:"Arjun Nair",motive:"Greed"
-  },
-  {
-    id:5,title:"The Software Founder's Fall",location:"Bengaluru · Koramangala Tech Hub",
-    text:"A startup founder was found dead in his 14th-floor office at 2 AM. The office door was locked from inside. His laptop shows he was actively editing a document at 1:47 AM. CCTV in the lift lobby shows no one entered after 1:30 AM. His co-founder stood to inherit full equity. A cleaner reported hearing a second voice through the door at 1:50 AM.",
-    clues:[
-      {icon:"💻",text:"Laptop activity at 1:47 AM — document titled 'Evidence_Final.pdf'",noise:false},
-      {icon:"🔒",text:"Office door locked from inside — deadbolt engaged, no secondary entry",noise:false},
-      {icon:"📹",text:"CCTV shows no entries after 1:30 AM — but the service stairwell camera was offline",noise:false},
-      {icon:"🧹",text:"Cleaner heard a second voice at 1:50 AM — described as 'calm and familiar'",noise:false},
-      {icon:"📊",text:"Co-founder's equity clause activates only upon accidental or natural death",noise:false},
-      {icon:"🌃",text:"Office AC unit was unusually loud that night — reported by two other floors",noise:true},
-    ],
-    suspects:[{name:"Dev Menon",role:"Co-Founder"},{name:"Nisha Rao",role:"Lead Engineer"},{name:"Prakash Iyer",role:"Venture Capitalist"},{name:"Amara Osei",role:"Operations Head"}],
-    killer:"Dev Menon",motive:"Greed"
-  },
-  {
-    id:6,title:"The Spice Merchant's Secret",location:"Kochi · Fort Kochi Heritage Quarter",
-    text:"A 70-year-old spice merchant was found drowned in his private courtyard well at dawn. His family home held a disputed will — three heirs stood to gain. A neighbour saw someone in a red dupatta leaving the compound at 4:30 AM. The merchant had recently changed his will, cutting out his eldest son entirely. His personal diary went missing the same morning.",
-    clues:[
-      {icon:"📜",text:"Revised will signed 3 days ago — eldest son removed, niece added",noise:false},
-      {icon:"🔴",text:"Neighbour describes red dupatta — youngest daughter owns one, niece owns two",noise:false},
-      {icon:"📓",text:"Personal diary missing — last entry referenced 'confrontation tonight'",noise:false},
-      {icon:"🌅",text:"Dawn fog was heavy that morning — visibility under 20 metres",noise:true},
-      {icon:"💧",text:"Well rope showed fresh abrasion marks — inconsistent with accidental fall",noise:false},
-      {icon:"📞",text:"Eldest son's phone records show a call to the niece at 3:50 AM",noise:false},
-    ],
-    suspects:[{name:"Vikram Nair",role:"Eldest Son"},{name:"Shalini Nair",role:"Youngest Daughter"},{name:"Preethi Menon",role:"Niece"},{name:"George Thomas",role:"Business Partner"}],
-    killer:"Preethi Menon",motive:"Greed"
-  },
-  {
-    id:7,title:"The Tea Estate Poisoning",location:"Coorg · Madikeri Estate Hills",
-    text:"The owner of a century-old tea estate was found dead in the tasting room after a private dinner with three guests. A rare alkaloid was detected in one of the tea samples. All four people present drank from the communal pot — only the host died. The surviving guests gave conflicting accounts of who poured the final cup.",
-    clues:[
-      {icon:"🍵",text:"Rare alkaloid found only in one cup — the one poured last for the host",noise:false},
-      {icon:"📸",text:"Security photo shows guest Latha reaching across the table at 9:11 PM",noise:false},
-      {icon:"💰",text:"Estate worth ₹8 crore — Latha is listed as secondary beneficiary",noise:false},
-      {icon:"🌿",text:"Alkaloid sourced from a local plant — requires advance preparation",noise:false},
-      {icon:"🍃",text:"Estate foreman says owner planned to sell the estate — Latha opposed it",noise:false},
-      {icon:"🌧️",text:"Power went out for 3 minutes at 9:08 PM — generator kicked in",noise:true},
-    ],
-    suspects:[{name:"Latha Cariappa",role:"Distant Relative"},{name:"Rohan Mathew",role:"Business Buyer"},{name:"Dr. Srini Kaul",role:"Family Doctor"},{name:"Joseph Pinto",role:"Estate Foreman"}],
-    killer:"Latha Cariappa",motive:"Greed"
-  },
-  {
-    id:8,title:"The Film Director's Last Cut",location:"Chennai · Kodambakkam Studio District",
-    text:"A celebrated Tamil film director was found stabbed in his private editing suite at midnight. Three people had been in a heated argument with him that week over a disputed screenplay credit. His hard drive containing the final cut of his next film was stolen. Director's last WhatsApp — sent at 11:42 PM: 'She's here'.",
-    clues:[
-      {icon:"🎬",text:"Stolen hard drive contained the film's only master copy — worth crores",noise:false},
-      {icon:"🚪",text:"Emergency exit ajar — panic bar operable from inside only",noise:false},
-      {icon:"✍️",text:"Disputed screenplay: writer claims director plagiarised her script",noise:false},
-      {icon:"📱",text:"Director's last WhatsApp — sent to producer at 11:42 PM: 'She's here'",noise:false},
-      {icon:"🎞️",text:"Film lab technician found a partial fingerprint on the editing console",noise:false},
-      {icon:"🌃",text:"Studio area had a power surge at 11:55 PM — some cameras reset",noise:true},
-    ],
-    suspects:[{name:"Kavitha Sundaram",role:"Screenwriter"},{name:"Ravi Krishnan",role:"Film Producer"},{name:"Mani Pillai",role:"Lab Technician"},{name:"Shalini Bose",role:"Lead Actress"}],
-    killer:"Kavitha Sundaram",motive:"Revenge"
-  },
-  {
-    id:9,title:"The Haunted Haveli Mystery",location:"Jodhpur · Old City Haveli District",
-    text:"A heritage hotel owner was found dead in the sealed Blue Room — a chamber said to be haunted and kept locked for decades. The door was bolted from inside with an iron bar. No windows. The victim had re-opened the room that morning after finding a hidden passage. Two sets of dusty footprints were found in the passage.",
-    clues:[
-      {icon:"🔩",text:"Iron bar door bolt — can only be engaged from inside the room",noise:false},
-      {icon:"🕳️",text:"Hidden passage behind a false wall — discovered by victim that morning",noise:false},
-      {icon:"📜",text:"Property deed dispute — eldest cousin stands to inherit if owner dies intestate",noise:false},
-      {icon:"🕯️",text:"Melted candle wax found near the passage entrance — recent use",noise:false},
-      {icon:"👣",text:"Dusty passage shows two sets of footprints — one entering, one leaving",noise:false},
-      {icon:"🦇",text:"Bat colony in the upper roof — common in old havelis, no relevance",noise:true},
-    ],
-    suspects:[{name:"Deepak Rathore",role:"Eldest Cousin"},{name:"Sunaina Rathore",role:"Youngest Sister"},{name:"Bilal Sheikh",role:"Hotel Manager"},{name:"Chanda Devi",role:"Housekeeper"}],
-    killer:"Deepak Rathore",motive:"Greed"
-  },
-  {
-    id:10,title:"The Diamond Merchant's Gambit",location:"Surat · Diamond Bourse District",
-    text:"A veteran diamond merchant was found dead in his private vault after the market closed. The vault requires two simultaneous keycards — his and his trusted broker's. A parcel of uncut diamonds worth ₹15 crore is missing. The broker claims she left before the vault was opened, but a surveillance frame shows her keycard scanner active at 6:14 PM.",
-    clues:[
-      {icon:"💎",text:"₹15 crore in uncut diamonds missing — no signs of forced entry",noise:false},
-      {icon:"🔐",text:"Vault requires two simultaneous keycards — merchant's + broker's",noise:false},
-      {icon:"📹",text:"Surveillance frame at 6:14 PM shows broker's keycard scanner active",noise:false},
-      {icon:"📁",text:"Victim had compiled a dossier on a price-fixing cartel — files now gone",noise:false},
-      {icon:"🤝",text:"Broker stood to lose her license and freedom if the cartel was exposed",noise:false},
-      {icon:"🏙️",text:"Heavy traffic outside the bourse — many vehicles in CCTV blindspot",noise:true},
-    ],
-    suspects:[{name:"Heena Vora",role:"Senior Broker"},{name:"Rajesh Mehta",role:"Rival Merchant"},{name:"Ankit Shah",role:"Junior Apprentice"},{name:"Farida Qureshi",role:"Cartel Liaison"}],
-    killer:"Heena Vora",motive:"Protection"
+  // 2. Sequences (30 puzzles)
+  for(let i=0; i<30; i++) {
+    let type = Math.floor(Math.random() * 3);
+    let start = Math.floor(Math.random() * 10) + 1;
+    let seq = []; let ans = 0; let step = Math.floor(Math.random() * 5) + 2;
+    if(type === 0) { // Arithmetic
+      for(let j=0;j<5;j++) seq.push(start + j*step);
+      ans = start + 5*step;
+    } else if(type === 1) { // Geometric
+      for(let j=0;j<4;j++) seq.push(start * Math.pow(step, j));
+      ans = start * Math.pow(step, 4);
+    } else { // Interleaved (+x, -y)
+      let step2 = Math.floor(Math.random() * 3) + 1;
+      let cur = start;
+      for(let j=0;j<5;j++) {
+        seq.push(cur);
+        if(j%2===0) cur += step; else cur -= step2;
+      }
+      ans = cur;
+    }
+    seq.push('?');
+    ALL_PUZZLES.push({
+      kind: PUZZLE_TYPES.SEQ, label: "Number Sequence",
+      sequence: seq, answer: ans.toString(),
+      options: [ans.toString(), (ans+step).toString(), (ans-1).toString(), (ans+2).toString()].sort(()=>Math.random()-0.5),
+      timeLimit: 35
+    });
+    // Fix correct index after shuffle
+    ALL_PUZZLES[ALL_PUZZLES.length-1].correct = ALL_PUZZLES[ALL_PUZZLES.length-1].options.indexOf(ans.toString());
   }
-];
 
-const TRAITS=[
-  {id:"visual",label:"Visual Thinker",sub:"Solves spatial puzzles first",exploit:"They miss audio/text clues"},
-  {id:"cautious",label:"Perfectionist",sub:"Uses full timer every time",exploit:"Rush with false urgency"},
-  {id:"risk",label:"Risk-Taker",sub:"Early aggressive accusations",exploit:"Plant red herrings — they'll bite"},
-  {id:"anxious",label:"Anxious Tracker",sub:"Monitors opponent constantly",exploit:"Fake confidence signals"}
-];
-const MOTIVES=["Greed","Revenge","Jealousy","Protection"];
-const MAX_ROUNDS=10;
+  // 3. Caesar Cipher (+1 Shift) (30 puzzles)
+  const PHRASES = [
+    "LOGIC", "PUZZLE", "SYSTEM", "HACKER", "CYPHER", "ENCRYPT", "DECODE", "MATRIX", "NETWORK", "SERVER",
+    "TIME IS MONEY", "KNOWLEDGE IS POWER", "STAY FOCUSED", "THINK FAST", "NEVER GIVE UP",
+    "THE QUICK BROWN FOX", "ACTIONS SPEAK LOUDER", "SILENCE IS GOLDEN", "PRACTICE MAKES PERFECT",
+    "FORTUNE FAVORS THE BOLD", "BETTER LATE THAN NEVER", "KEEP CALM AND CARRY ON",
+    "A PENNY SAVED IS A PENNY EARNED", "ROME WAS NOT BUILT IN A DAY", "THE SHOW MUST GO ON",
+    "ANALYZE THE DATA", "SYSTEM COMPROMISED", "ACCESS GRANTED", "SECURITY PROTOCOL", "MAINFRAME BREACHED"
+  ];
+  PHRASES.forEach(phrase => {
+    let shifted = phrase.split('').map(c => {
+      if(c === ' ') return ' ';
+      if(c === 'Z') return 'A';
+      return String.fromCharCode(c.charCodeAt(0) + 1);
+    }).join('');
+    
+    // Dynamic Time limit based on length: Short words = ~30s, Long phrases = up to 90s
+    let dynTime = Math.floor(Math.max(30, Math.min(95, phrase.length * 3.5)));
+    
+    ALL_PUZZLES.push({
+      kind: PUZZLE_TYPES.CIPHER, label: "Caesar Cipher (+1)",
+      question: `Decode the text.\nEvery letter is shifted forward by 1 (Shift back to solve).\n\n"${shifted}"`,
+      answer: phrase,
+      timeLimit: dynTime
+    });
+  });
+
+  // 4. Word Unscramble (30 puzzles)
+  const SCRAMBLES = [
+    "ALGORITHM","VARIABLE","FUNCTION","ITERATION","LOGARITHM","HEURISTIC","PARADIGM",
+    "RECURSION","ENCRYPTION","SYMMETRY","GEOMETRY","CALCULUS","EQUATION","FRACTION",
+    "DECIMAL","INFERENCE","DEDUCTION","HYPOTHESIS","EVIDENCE","ANALYSIS","SYNTHESIS",
+    "AESTHETIC","COGNITIVE","PARADOX","ANOMALY","TEMPLATE","PROTOCOL","INTERFACE","COMPILER","DEBUGGER"
+  ];
+  SCRAMBLES.forEach(word => {
+    let scrambled = word.split('').sort(()=>Math.random()-0.5).join('');
+    // Prevent accidentally unscrambled words
+    while(scrambled === word) { scrambled = word.split('').sort(()=>Math.random()-0.5).join(''); }
+    
+    ALL_PUZZLES.push({
+      kind: PUZZLE_TYPES.UNSCRAMBLE, label: "Word Unscramble",
+      scrambled: scrambled, answer: word,
+      timeLimit: 40
+    });
+  });
+
+  // Shuffle master list
+  ALL_PUZZLES = ALL_PUZZLES.sort(() => Math.random() - 0.5);
+}
+
+const MAX_ROUNDS = 10;
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let state={
   peer:null,conn:null,isSolo:false,
-  myName:"Detective",oppName:"Opponent",
-  myScore:0,oppScore:0,round:1,phase:1,
-  currentCase:null,currentPuzzle:null,
-  usedCaseIndices:[],usedPuzzleIndices:[],
+  myName:"Player",oppName:"Opponent",
+  myScore:0,oppScore:0,round:1,
+  gamePuzzleIndices: [], // Array of 10 indices chosen for this game
+  currentPuzzle:null,
   myTelem:{hesitation:0,corrections:0,puzzleTime:0},
   oppTelem:{hesitation:0,corrections:0,puzzleTime:0},
-  assignedOppTraits:[],selectedTraits:[],
-  selectedSuspect:null,selectedMotive:null,
   puzzleStartTime:0,puzzleSolved:false,puzzleSubmitted:false,
-  phaseTimer:null,timerInterval:null,
-  profileBonus:false,myHypothesis:"",oppHypothesis:"",
-  puzzleTimeLimit:55,myPuzzleTime:null,oppPuzzleTime:null,
-  myAccusation:null,oppAccusation:null,
+  timerInterval:null, puzzleTimeLimit:45,
+  myPuzzleTime:null, oppPuzzleTime:null,
+  myResult:null, oppResult:null,
   correctionCount:0,lastClickTime:Date.now(),
   telemInterval:null,nextRoundLock:false,isHost:false
 };
@@ -696,10 +438,15 @@ function connLog(msg){
   el.innerHTML+=`<div>[${t}] ${msg}</div>`;el.scrollTop=el.scrollHeight;
 }
 function initPeer(){
+  generateAllPuzzles();
   const peer=new Peer(undefined,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
   state.peer=peer;
   peer.on('open',id=>{document.getElementById('my-peer-id').textContent=id;connLog("Peer open: "+id.slice(0,8)+"…");toast("Your ID ready — share it!","info");});
-  peer.on('connection',conn=>{state.myName=document.getElementById('my-name').value.trim()||"Detective";state.isHost=true;setupConn(conn);document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span>Opponent connected…</div>`;});
+  peer.on('connection',conn=>{
+    state.myName=document.getElementById('my-name').value.trim()||"Player 1";
+    state.isHost=true;setupConn(conn);
+    document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span>Opponent connected…</div>`;
+  });
   peer.on('error',e=>{connLog("ERROR: "+e.type);toast("PeerJS error: "+e.type,"error");});
   peer.on('disconnected',()=>peer.reconnect());
 }
@@ -711,7 +458,7 @@ function setupConn(conn){
 }
 function connectToPeer(){
   const id=document.getElementById('opp-id-input').value.trim();
-  const name=document.getElementById('my-name').value.trim()||"Detective";
+  const name=document.getElementById('my-name').value.trim()||"Player 2";
   if(!id){toast("Enter opponent ID","error");return}
   state.myName=name;state.isHost=false;
   const btn=document.getElementById('connect-btn');btn.textContent="Connecting…";btn.disabled=true;
@@ -725,96 +472,82 @@ function handleData(data){
   if(data.type==="handshake"){
     state.oppName=data.name;toast(data.name+" connected!","success");
     document.getElementById('status-row').innerHTML=`<div class="status-badge status-connected"><span class="status-dot"></span>Playing vs ${data.name}</div>`;
-    const cIdx=pickNextCase();const pIdx=pickNextPuzzle();
-    state.currentCase=CASES[cIdx];state.currentPuzzle=ALL_PUZZLES[pIdx];
-    setTimeout(()=>{sendMsg_raw({type:"start",name:state.myName,caseIndex:cIdx,puzzleIndex:pIdx,usedCases:[cIdx],usedPuzzles:[pIdx]});setTimeout(()=>startGame(false),300);},200);
+    
+    // Host selects 10 unique puzzle indices
+    let pIndices = [];
+    while(pIndices.length < 10) {
+      let r = Math.floor(Math.random() * ALL_PUZZLES.length);
+      if(!pIndices.includes(r)) pIndices.push(r);
+    }
+    state.gamePuzzleIndices = pIndices;
+    
+    setTimeout(()=>{
+      sendMsg_raw({type:"start", name:state.myName, puzzles: pIndices});
+      setTimeout(()=>startGame(false),300);
+    },200);
   }
   else if(data.type==="start"){
-    state.oppName=data.name;state.currentCase=CASES[data.caseIndex];state.currentPuzzle=ALL_PUZZLES[data.puzzleIndex];
-    if(data.usedCases)state.usedCaseIndices=data.usedCases;if(data.usedPuzzles)state.usedPuzzleIndices=data.usedPuzzles;
-    toast("Game starting!","success");setTimeout(()=>startGame(true),300);
+    state.oppName=data.name;
+    state.gamePuzzleIndices = data.puzzles;
+    toast("Game starting!","success");
+    setTimeout(()=>startGame(true),300);
   }
   else if(data.type==="telem"){state.oppTelem=data.telem;updateTelemUI();}
   else if(data.type==="opp_status"){document.getElementById('opp-status-text').textContent=data.status;}
-  else if(data.type==="puzzle_done"){state.oppPuzzleTime=data.time;addLog(state.oppName+" solved puzzle in "+data.time+"s","opp");updateTelemOppSpeed(data.time);checkBothPuzzleDone();}
-  else if(data.type==="accusation"){state.oppAccusation=data;addLog(state.oppName+" submitted accusation","opp");if(state.myAccusation)resolveRound();}
+  else if(data.type==="puzzle_done"){
+    state.oppPuzzleTime=data.time;
+    state.oppResult=data.correct;
+    addLog(`${state.oppName} submitted in ${data.time}s`,"opp");
+    updateTelemOppSpeed(data.time);
+    checkBothPuzzleDone();
+  }
   else if(data.type==="chat"){addChatMsg(data.text,false);}
   else if(data.type==="next_round"){if(!state.nextRoundLock)advanceRound();}
-  else if(data.type==="new_round_data"){state.currentCase=CASES[data.caseIndex];state.currentPuzzle=ALL_PUZZLES[data.puzzleIndex];state.usedCaseIndices=data.usedCases;state.usedPuzzleIndices=data.usedPuzzles;}
 }
 function sendMsg_raw(obj){if(state.conn&&state.conn.open){try{state.conn.send(obj);}catch(e){console.warn("send failed:",e);}}}
 function copyMyId(){const id=document.getElementById('my-peer-id').textContent;navigator.clipboard.writeText(id).then(()=>toast("ID copied!","success"));}
 
-// ── SELECTION ────────────────────────────────────────────────────────────────
-function pickNextCase(){
-  const av=CASES.map((_,i)=>i).filter(i=>!state.usedCaseIndices.includes(i));
-  if(!av.length){state.usedCaseIndices=[];return Math.floor(Math.random()*CASES.length);}
-  const idx=av[Math.floor(Math.random()*av.length)];state.usedCaseIndices.push(idx);return idx;
-}
-function pickNextPuzzle(){
-  const av=ALL_PUZZLES.map((_,i)=>i).filter(i=>!state.usedPuzzleIndices.includes(i));
-  if(!av.length){state.usedPuzzleIndices=[];return Math.floor(Math.random()*ALL_PUZZLES.length);}
-  const idx=av[Math.floor(Math.random()*av.length)];state.usedPuzzleIndices.push(idx);return idx;
-}
-
 // ── SOLO ─────────────────────────────────────────────────────────────────────
 function startSolo(){
-  state.isSolo=true;state.myName=document.getElementById('my-name').value.trim()||"Detective";state.oppName="AI Dali";
-  const cIdx=pickNextCase();const pIdx=pickNextPuzzle();
-  state.currentCase=CASES[cIdx];state.currentPuzzle=ALL_PUZZLES[pIdx];
-  startGame(false,cIdx);
+  state.isSolo=true;state.myName=document.getElementById('my-name').value.trim()||"Player";state.oppName="AI Mastermind";
+  generateAllPuzzles();
+  let pIndices = [];
+  while(pIndices.length < 10) {
+    let r = Math.floor(Math.random() * ALL_PUZZLES.length);
+    if(!pIndices.includes(r)) pIndices.push(r);
+  }
+  state.gamePuzzleIndices = pIndices;
+  startGame(false);
 }
 
 // ── GAME START ────────────────────────────────────────────────────────────────
 function startGame(isReceiver){
-  if(!state.currentCase){toast("Error: no case loaded","error");return}
-  state.assignedOppTraits=shuffleArr([...TRAITS]).slice(0,2).map(t=>t.id);
   showScreen('game-screen');updateHeader();startTelemetry();
-  showPhaseTransition("Round 1","The Case File","Study the evidence carefully",()=>renderPhase1());
+  state.round = 1;
+  loadRoundPuzzle();
 }
 
-// ── PHASE 1 ───────────────────────────────────────────────────────────────────
-function renderPhase1(){
-  state.phase=1;updatePhaseLabel("Case File · Evidence Review");sendStatus("Reviewing case file…");
-  const c=state.currentCase;
-  const cluesHTML=c.clues.map(cl=>`<div class="clue-item"><span class="clue-icon">${cl.icon}</span><span class="clue-text">${cl.text}${cl.noise?`<span class="noise-tag">NOISE?</span>`:''}</span></div>`).join('');
-  mainPanel(`
-    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">${[1,2,3,4].map((_,i)=>`<div class="phase-pip ${i===0?'active':''}" id="pip-${i}"></div>`).join('')}</div>
-    <div class="phase-label">Phase 1 · Evidence Review · Round ${state.round}/${MAX_ROUNDS}</div>
-    <div class="case-card">
-      <div class="case-title">${c.title}</div>
-      <div class="case-location">📍 ${c.location}</div>
-      <div class="case-body">${c.text}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem">
-      <div style="font-size:.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.2rem">Evidence Clues · 20% may be noise</div>
-      ${cluesHTML}
-    </div>
-    <div style="margin-top:.75rem">
-      <textarea id="my-hyp-input" placeholder="Type your working hypothesis here… (private notes)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;outline:none;resize:vertical;min-height:80px;line-height:1.6" oninput="state.correctionCount+=0.1;state.myHypothesis=this.value"></textarea>
-    </div>
-    <button class="btn btn-gold" style="width:100%" onclick="proceedToPhase2()">Proceed to Puzzle Gate →</button>
-  `);
-  setPips([0]);
-}
-function proceedToPhase2(){
-  state.myHypothesis=document.getElementById('my-hyp-input')?.value||"";
-  showPhaseTransition("Phase 2","Puzzle Gate","Crack the puzzle to unlock evidence",()=>renderPhase2());
+function loadRoundPuzzle() {
+  state.currentPuzzle = ALL_PUZZLES[state.gamePuzzleIndices[state.round - 1]];
+  state.puzzleTimeLimit = state.currentPuzzle.timeLimit || 45;
+  showPhaseTransition("Round " + state.round, "Puzzle Gate", state.currentPuzzle.label, () => renderPuzzlePhase());
 }
 
-// ── PHASE 2 — PUZZLE GATE (multi-type) ───────────────────────────────────────
-function renderPhase2(){
-  state.phase=2;updatePhaseLabel("Puzzle Gate");sendStatus("Solving puzzle…");
-  state.puzzleStartTime=Date.now();state.puzzleSolved=false;state.puzzleSubmitted=false;state.myPuzzleTime=null;
+// ── PUZZLE PHASE ───────────────────────────────────────────────────────────────
+function renderPuzzlePhase(){
+  sendStatus("Solving puzzle…");
+  state.puzzleStartTime=Date.now();
+  state.puzzleSolved=false; state.puzzleSubmitted=false;
+  state.myPuzzleTime=null; state.oppPuzzleTime=null;
+  state.myResult=null; state.oppResult=null;
+  selectedPuzzleOpt = null; state.correctionCount=0;
+
   const p=state.currentPuzzle;
-  if(!p){toast("No puzzle loaded","error");return;}
-
   let puzzleBodyHTML='';
   if(p.kind===PUZZLE_TYPES.SEQ)        puzzleBodyHTML=buildSeqPuzzle(p);
-  else if(p.kind===PUZZLE_TYPES.CIPHER) puzzleBodyHTML=buildCipherPuzzle(p);
-  else if(p.kind===PUZZLE_TYPES.DEDUCTION) puzzleBodyHTML=buildDeductionPuzzle(p);
-  else if(p.kind===PUZZLE_TYPES.UNSCRAMBLE) puzzleBodyHTML=buildUnscramblePuzzle(p);
-  else puzzleBodyHTML=buildMCQPuzzle(p); // MCQ / LOGIC default
+  else if(p.kind===PUZZLE_TYPES.CIPHER) puzzleBodyHTML=buildTextPuzzle(p, true);
+  else if(p.kind===PUZZLE_TYPES.UNSCRAMBLE) puzzleBodyHTML=buildTextPuzzle(p, false);
+  else puzzleBodyHTML=buildMCQPuzzle(p);
 
   const timerHTML=`
     <div class="timer-circle">
@@ -826,23 +559,16 @@ function renderPhase2(){
     </div>`;
 
   mainPanel(`
-    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">${[0,1,2,3].map((i)=>`<div class="phase-pip ${i<1?'done':i===1?'active':''}" id="pip-${i}"></div>`).join('')}</div>
-    <div class="phase-label">Phase 2 · Puzzle Gate</div>
-    <div class="puzzle-card">
+    <div class="panel-card">
       <div class="puzzle-header">
         <span class="puzzle-type-badge">${p.label}</span>
         ${timerHTML}
       </div>
-      <div class="puzzle-question" style="white-space:pre-wrap">${p.question}</div>
-      <div class="puzzle-hint-box">💡 Hint: ${p.hint}</div>
+      ${p.question ? `<div class="puzzle-question" style="white-space:pre-wrap">${p.question}</div>` : ''}
       ${puzzleBodyHTML}
-      <div class="unlocked-clue" id="unlocked-clue">
-        <strong style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:.1em">🔓 Evidence Unlocked</strong>
-        <div style="margin-top:.4rem" id="unlocked-text"></div>
-      </div>
+      <div id="waiting-opp-msg" style="display:none;text-align:center;color:var(--text3);font-size:.8rem;font-family:'JetBrains Mono',monospace;margin-top:1rem">Waiting for ${state.oppName}…</div>
     </div>
   `);
-  setPips([0,1]);
   startPuzzleTimer();
 }
 
@@ -851,73 +577,9 @@ function buildSeqPuzzle(p){
   const seqHTML=p.sequence.map(n=>`<div class="${n==='?'?'seq-blank':'seq-num'}">${n}</div>`).join('<span style="color:var(--text3);font-size:1.2rem;align-self:center">·</span>');
   const optsHTML=p.options.map((o,i)=>`<div class="seq-opt" id="sopt-${i}" onclick="selectSeqOpt(${i},'${p.correct}')">${o}</div>`).join('');
   return `
-    <div style="font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem">Sequence:</div>
     <div class="seq-display">${seqHTML}</div>
     <div style="font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem">What comes next?</div>
-    <div class="seq-opts">${optsHTML}</div>`;
-}
-function selectSeqOpt(i,correctIdx){
-  if(state.puzzleSubmitted)return;
-  document.querySelectorAll('.seq-opt').forEach((el,j)=>el.classList.toggle('selected',j===i));
-  selectedPuzzleOpt=i;
-  document.getElementById('puzzle-submit-btn')&&(document.getElementById('puzzle-submit-btn').disabled=false);
-  submitPuzzleAuto(parseInt(correctIdx));
-}
-
-function buildCipherPuzzle(p){
-  return `
-    <div class="cipher-input-row">
-      <input type="text" class="cipher-input" id="cipher-ans" placeholder="TYPE YOUR DECODED ANSWER…" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')checkCipher()">
-      <button class="cipher-check-btn" onclick="checkCipher()">Check →</button>
-    </div>
-    <div class="cipher-feedback" id="cipher-feedback"></div>
-    <button class="btn btn-gold" style="width:100%;margin-top:.25rem;display:none" id="puzzle-submit-btn" onclick="forcePuzzleDone(true)">Evidence Unlocked — Continue →</button>`;
-}
-function checkCipher(){
-  if(state.puzzleSubmitted)return;
-  const input=document.getElementById('cipher-ans');if(!input)return;
-  const val=input.value.trim().toUpperCase();
-  const correct=state.currentPuzzle.answer.toUpperCase();
-  const fb=document.getElementById('cipher-feedback');
-  if(val===correct){
-    fb.textContent="✓ Correct! '"+val+"' decoded successfully.";fb.className='cipher-feedback show ok';
-    state.puzzleSolved=true;input.disabled=true;
-    const btn=document.getElementById('puzzle-submit-btn');if(btn){btn.style.display='block';}
-    document.getElementById('unlocked-text').textContent=state.currentPuzzle.unlocks;
-    document.getElementById('unlocked-clue').classList.add('show');
-    toast("Cipher cracked! Evidence unlocked","success");
-    setTimeout(()=>forcePuzzleDone(true),200);
-  } else {
-    state.myTelem.corrections++;state.correctionCount++;
-    const hint=levenshteinHint(val,correct);
-    fb.textContent="✗ Not quite. "+hint;fb.className='cipher-feedback show bad';
-  }
-}
-function levenshteinHint(a,b){
-  if(a.length===0)return"Start typing your answer.";
-  const words_a=a.split(' ');const words_b=b.split(' ');
-  const right=words_a.filter((w,i)=>words_b[i]===w).length;
-  return right>0?right+" word(s) correct so far — keep going.":"Try again — think about the shift direction.";
-}
-
-function buildDeductionPuzzle(p){
-  const cluesHTML=p.clues.map((cl,i)=>`<div class="deduction-clue-item"><span class="clue-num">Clue ${i+1}:</span>${cl}</div>`).join('');
-  const optsHTML=p.options.map((o,i)=>`<div class="puzzle-opt" id="popt-${i}" onclick="selectMCQOpt(${i})">${o}</div>`).join('');
-  return `
-    <div class="deduction-clues">${cluesHTML}</div>
-    <div style="font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.45rem">Your conclusion:</div>
-    <div class="puzzle-options">${optsHTML}</div>
-    <button class="btn btn-gold" style="width:100%;margin-top:.25rem" id="puzzle-submit-btn" onclick="submitMCQPuzzle()" disabled>Submit Deduction</button>`;
-}
-
-function buildUnscramblePuzzle(p){
-  const letters=p.scrambled.split('').map(l=>`<div class="scramble-letter">${l}</div>`).join('');
-  const optsHTML=p.options.map((o,i)=>`<div class="puzzle-opt" id="popt-${i}" onclick="selectMCQOpt(${i})">${o}</div>`).join('');
-  return `
-    <div style="font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.45rem">Scrambled letters:</div>
-    <div class="scramble-display">${letters}</div>
-    <div style="font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.45rem">Choose the correct word:</div>
-    <div class="puzzle-options">${optsHTML}</div>
+    <div class="seq-opts">${optsHTML}</div>
     <button class="btn btn-gold" style="width:100%;margin-top:.25rem" id="puzzle-submit-btn" onclick="submitMCQPuzzle()" disabled>Submit Answer</button>`;
 }
 
@@ -928,66 +590,84 @@ function buildMCQPuzzle(p){
     <button class="btn btn-gold" style="width:100%;margin-top:.25rem" id="puzzle-submit-btn" onclick="submitMCQPuzzle()" disabled>Submit Answer</button>`;
 }
 
+function buildTextPuzzle(p, isCipher){
+  let extraHTML = '';
+  if(!isCipher && p.scrambled) {
+    const letters=p.scrambled.split('').map(l=>`<div class="scramble-letter">${l}</div>`).join('');
+    extraHTML = `<div class="scramble-display">${letters}</div>`;
+  }
+  return `
+    ${extraHTML}
+    <div class="text-input-row">
+      <input type="text" class="text-input" id="text-ans" placeholder="TYPE YOUR ANSWER…" oninput="this.value=this.value.toUpperCase(); state.correctionCount+=0.1;" onkeydown="if(event.key==='Enter')checkTextAnswer()">
+      <button class="text-check-btn" onclick="checkTextAnswer()">Check →</button>
+    </div>
+    <div class="text-feedback" id="text-feedback"></div>`;
+}
+
 // ── PUZZLE INTERACTION ────────────────────────────────────────────────────────
 let selectedPuzzleOpt=null;
 function selectMCQOpt(i){
   if(state.puzzleSolved||state.puzzleSubmitted)return;
   selectedPuzzleOpt=i;
-  document.querySelectorAll('.puzzle-opt,.deduction-clue-item').forEach((el,j)=>{if(el.classList.contains('puzzle-opt'))el.classList.toggle('selected',j===i)});
+  document.querySelectorAll('.puzzle-opt').forEach((el,j)=>el.classList.toggle('selected',j===i));
   const btn=document.getElementById('puzzle-submit-btn');if(btn)btn.disabled=false;
   state.myTelem.hesitation=Math.round((Date.now()-state.lastClickTime)/100)/10;state.lastClickTime=Date.now();
 }
+function selectSeqOpt(i,correctIdx){
+  if(state.puzzleSolved||state.puzzleSubmitted)return;
+  selectedPuzzleOpt=i;
+  document.querySelectorAll('.seq-opt').forEach((el,j)=>el.classList.toggle('selected',j===i));
+  const btn=document.getElementById('puzzle-submit-btn');if(btn)btn.disabled=false;
+  state.myTelem.hesitation=Math.round((Date.now()-state.lastClickTime)/100)/10;state.lastClickTime=Date.now();
+}
+
 function submitMCQPuzzle(){
   if(state.puzzleSubmitted)return;
   if(selectedPuzzleOpt===null){toast("Select an answer","error");return}
   const p=state.currentPuzzle;
-  const correct=(selectedPuzzleOpt===p.correct);
-  finalizePuzzle(correct,selectedPuzzleOpt,p.correct);
-}
-function submitPuzzleAuto(correctIdx){
-  if(state.puzzleSubmitted)return;
-  if(selectedPuzzleOpt===null)return;
-  const correct=(selectedPuzzleOpt===correctIdx);
-  finalizePuzzle(correct,selectedPuzzleOpt,correctIdx);
-}
-function finalizePuzzle(correct,chosen,correctIdx){
-  state.puzzleSubmitted=true;clearInterval(state.timerInterval);
-  const elapsed=Math.round((Date.now()-state.puzzleStartTime)/1000);
-  state.myPuzzleTime=elapsed;addLog("You solved puzzle in "+elapsed+"s","you");
-  sendMsg_raw({type:"puzzle_done",time:elapsed});updateTelemYouSpeed(elapsed);
-  const p=state.currentPuzzle;
-  if(chosen!==null){
-    const el=document.getElementById('popt-'+chosen)||document.getElementById('sopt-'+chosen);
-    if(el)el.classList.add(correct?'correct':'wrong');
-  }
-  const cEl=document.getElementById('popt-'+correctIdx)||document.getElementById('sopt-'+correctIdx);
-  if(cEl)cEl.classList.add('correct');
-  if(correct){
-    state.puzzleSolved=true;
-    document.getElementById('unlocked-text').textContent=p.unlocks;
-    document.getElementById('unlocked-clue').classList.add('show');
-    toast("Puzzle solved! Evidence unlocked","success");
-  } else {
-    toast("Wrong — but you may still proceed","error");
-  }
-  const btn=document.getElementById('puzzle-submit-btn');if(btn){btn.disabled=true;btn.textContent="✓ Submitted";}
-  setTimeout(()=>checkBothPuzzleDone(),1600);
-}
-function forcePuzzleDone(correct){
-  if(state.puzzleSubmitted)return;
-  state.puzzleSubmitted=true;clearInterval(state.timerInterval);
-  const elapsed=Math.round((Date.now()-state.puzzleStartTime)/1000);
-  state.myPuzzleTime=elapsed;addLog("You solved puzzle in "+elapsed+"s","you");
-  sendMsg_raw({type:"puzzle_done",time:elapsed});updateTelemYouSpeed(elapsed);
-  if(correct){state.puzzleSolved=true;}
-  setTimeout(()=>checkBothPuzzleDone(),800);
+  const correct=(selectedPuzzleOpt===parseInt(p.correct));
+  finalizePuzzle(correct, selectedPuzzleOpt, parseInt(p.correct));
 }
 
-function checkBothPuzzleDone(){
-  if(state.isSolo&&!state.oppPuzzleTime){state.oppPuzzleTime=Math.floor(Math.random()*25)+8;updateTelemOppSpeed(state.oppPuzzleTime);}
-  if(state.myPuzzleTime!==null&&(state.oppPuzzleTime!==null||state.isSolo)){
-    setTimeout(()=>showPhaseTransition("Phase 3","Cold Read","Profile your opponent's psychology",()=>renderPhase3()),800);
-  } else {document.getElementById('opp-status-text').textContent="Solving puzzle…";}
+function checkTextAnswer(){
+  if(state.puzzleSubmitted)return;
+  const input=document.getElementById('text-ans');if(!input)return;
+  const val=input.value.trim().toUpperCase();
+  const correct=state.currentPuzzle.answer.toUpperCase();
+  const fb=document.getElementById('text-feedback');
+  if(val===correct){
+    fb.textContent="✓ Correct!";fb.className='text-feedback show ok';
+    input.disabled=true;
+    finalizePuzzle(true, null, null);
+  } else {
+    state.myTelem.corrections++;state.correctionCount++;
+    fb.textContent="✗ Incorrect. Keep trying or let timer run out.";fb.className='text-feedback show bad';
+  }
+}
+
+function finalizePuzzle(correct, chosenIdx, correctIdx){
+  state.puzzleSubmitted=true; clearInterval(state.timerInterval);
+  const elapsed=Math.round((Date.now()-state.puzzleStartTime)/1000);
+  state.myPuzzleTime=elapsed; state.myResult=correct;
+  
+  if(chosenIdx !== null) {
+    const el=document.getElementById('popt-'+chosenIdx)||document.getElementById('sopt-'+chosenIdx);
+    if(el)el.classList.add(correct?'correct':'wrong');
+    const cEl=document.getElementById('popt-'+correctIdx)||document.getElementById('sopt-'+correctIdx);
+    if(cEl)cEl.classList.add('correct');
+  }
+
+  const btn=document.getElementById('puzzle-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent="✓ Submitted";}
+  document.getElementById('waiting-opp-msg').style.display='block';
+  sendStatus("Waiting for opponent");
+
+  addLog("You submitted answer in "+elapsed+"s","you");
+  sendMsg_raw({type:"puzzle_done", time:elapsed, correct:correct});
+  updateTelemYouSpeed(elapsed);
+  
+  setTimeout(()=>checkBothPuzzleDone(), 500);
 }
 
 function startPuzzleTimer(){
@@ -1002,166 +682,95 @@ function startPuzzleTimer(){
     if(remaining<=0){clearInterval(state.timerInterval);autoSubmitPuzzle();}
   },1000);
 }
+
 function autoSubmitPuzzle(){
   if(state.puzzleSubmitted)return;
-  state.puzzleSubmitted=true;clearInterval(state.timerInterval);
-  const elapsed=state.puzzleTimeLimit;state.myPuzzleTime=elapsed;
-  addLog("Time expired — auto-submitted","you");sendMsg_raw({type:"puzzle_done",time:elapsed});updateTelemYouSpeed(elapsed);
-  const p=state.currentPuzzle;
-  const cEl=document.getElementById('popt-'+p.correct)||document.getElementById('sopt-'+p.correct);
-  if(cEl)cEl.classList.add('correct');
-  if(selectedPuzzleOpt!==null&&selectedPuzzleOpt!==p.correct){
-    const wEl=document.getElementById('popt-'+selectedPuzzleOpt)||document.getElementById('sopt-'+selectedPuzzleOpt);
-    if(wEl)wEl.classList.add('wrong');
+  state.puzzleSubmitted=true; clearInterval(state.timerInterval);
+  const elapsed=state.puzzleTimeLimit; state.myPuzzleTime=elapsed; state.myResult=false;
+  addLog("Time expired","you");
+  sendMsg_raw({type:"puzzle_done", time:elapsed, correct:false});
+  updateTelemYouSpeed(elapsed);
+  toast("Time's up!","error");
+  setTimeout(()=>checkBothPuzzleDone(), 1000);
+}
+
+function checkBothPuzzleDone(){
+  if(state.isSolo&&state.oppPuzzleTime===null){
+    // Simulate AI
+    let aiTime = Math.floor(Math.random() * (state.puzzleTimeLimit - 10)) + 5;
+    let aiCorrect = Math.random() > 0.3; // 70% accuracy
+    setTimeout(()=>{
+      state.oppPuzzleTime=aiTime; state.oppResult=aiCorrect;
+      updateTelemOppSpeed(aiTime);
+      checkBothPuzzleDone();
+    }, (aiTime > state.myPuzzleTime ? (aiTime - state.myPuzzleTime)*100 : 1000));
+    return;
   }
-  toast("Time's up! Moving on…","error");
-  setTimeout(()=>checkBothPuzzleDone(),1500);
+  
+  if(state.myPuzzleTime!==null && state.oppPuzzleTime!==null){
+    setTimeout(()=>renderRoundResult(), 800);
+  }
 }
 
-// ── PHASE 3 — COLD READ ───────────────────────────────────────────────────────
-function renderPhase3(){
-  state.phase=3;updatePhaseLabel("Cold Read · Profiling");sendStatus("Profiling opponent…");
-  const traitHTML=TRAITS.map(t=>`
-    <div class="trait-item" id="trait-${t.id}" onclick="toggleTrait('${t.id}')">
-      <div class="trait-check" id="tcheck-${t.id}"></div>
-      <div><div class="trait-label">${t.label}</div><div class="trait-sub">${t.sub} · Exploit: ${t.exploit}</div></div>
-    </div>`).join('');
-  mainPanel(`
-    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">${[0,1,2,3].map((i)=>`<div class="phase-pip ${i<2?'done':i===2?'active':''}" id="pip-${i}"></div>`).join('')}</div>
-    <div class="phase-label">Phase 3 · Cold Read · Round ${state.round}/${MAX_ROUNDS}</div>
-    <div class="profile-card">
-      <div class="profile-title">🧠 Opponent Psychological Profile</div>
-      <p style="font-size:.82rem;color:var(--text3);margin-bottom:1rem;font-family:'JetBrains Mono',monospace">Based on behavioral telemetry, select 2 traits describing <strong style="color:var(--text)">${state.oppName}</strong>:</p>
-      <div class="trait-grid" id="trait-grid">${traitHTML}</div>
-      <div style="margin-top:.75rem;font-size:.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace" id="trait-count-hint">Select exactly 2 traits</div>
-    </div>
-    <button class="btn btn-gold" style="width:100%" onclick="submitProfile()">Submit Profile Read →</button>
-  `);
-  setPips([0,1,2]);state.selectedTraits=[];
-}
-function toggleTrait(id){
-  const idx=state.selectedTraits.indexOf(id);
-  if(idx>=0){state.selectedTraits.splice(idx,1);document.getElementById('trait-'+id).classList.remove('selected');document.getElementById('tcheck-'+id).textContent='';}
-  else{if(state.selectedTraits.length>=2){toast("Select only 2 traits","error");return}state.selectedTraits.push(id);document.getElementById('trait-'+id).classList.add('selected');document.getElementById('tcheck-'+id).textContent='✓';}
-  document.getElementById('trait-count-hint').textContent=state.selectedTraits.length+"/2 selected";
-}
-function submitProfile(){
-  if(state.selectedTraits.length!==2){toast("Select exactly 2 traits","error");return}
-  const correct=state.selectedTraits.filter(t=>state.assignedOppTraits.includes(t));
-  state.profileBonus=correct.length>=2;
-  state.selectedTraits.forEach(id=>{
-    const el=document.getElementById('trait-'+id);
-    if(state.assignedOppTraits.includes(id)){el.classList.remove('selected');el.classList.add('correct-trait');document.getElementById('tcheck-'+id).textContent='✓';}
-    else{el.classList.remove('selected');el.classList.add('wrong-trait');document.getElementById('tcheck-'+id).textContent='✗';}
-  });
-  state.assignedOppTraits.forEach(id=>{const el=document.getElementById('trait-'+id);if(el&&!el.classList.contains('correct-trait'))el.style.border='1px dashed var(--teal)';});
-  if(state.profileBonus){toast("🎯 Profile Bonus! Correct read!","success");addLog("Profile bonus!","you");}
-  else{toast(correct.length===1?"1 trait correct — no bonus":"Both wrong","info");}
-  sendMsg_raw({type:"profile_submit",traits:state.selectedTraits});
-  setTimeout(()=>showPhaseTransition("Phase 4","The Accusation","Name the killer and their motive",()=>renderPhase4(state.profileBonus)),2000);
-}
+// ── ROUND RESULT ──────────────────────────────────────────────────────────────
+function renderRoundResult(){
+  const myPts = state.myResult ? (100 + Math.max(0, state.puzzleTimeLimit - state.myPuzzleTime)*2) : 0;
+  const oppPts = state.oppResult ? (100 + Math.max(0, state.puzzleTimeLimit - state.oppPuzzleTime)*2) : 0;
+  
+  state.myScore += myPts;
+  state.oppScore += oppPts;
+  updateHeader();
 
-// ── PHASE 4 — ACCUSATION ─────────────────────────────────────────────────────
-function renderPhase4(hasBonus){
-  state.phase=4;updatePhaseLabel("Accusation");sendStatus("Making accusation…");
-  const c=state.currentCase;
-  const suspHTML=c.suspects.map((s,i)=>`<div class="suspect-card" id="susp-${i}" onclick="selectSuspect(${i})"><div class="suspect-name">${s.name}</div><div class="suspect-role">${s.role}</div></div>`).join('');
-  const motHTML=MOTIVES.map((m,i)=>`<div class="motive-btn" id="mot-${i}" onclick="selectMotive(${i})">${m}</div>`).join('');
-  const bonusNote=hasBonus?'<div style="background:rgba(26,188,156,.08);border:1px solid var(--teal);border-radius:var(--radius);padding:.6rem .75rem;font-size:.8rem;color:var(--teal2);margin-bottom:1rem;font-family:\'JetBrains Mono\',monospace">🎁 Profile Bonus Active: +25 Points possible</div>':'';
+  const isLastRound = state.round >= MAX_ROUNDS;
   
   mainPanel(`
-    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">${[0,1,2,3].map((i)=>`<div class="phase-pip done" id="pip-${i}"></div>`).join('')}</div>
-    <div class="phase-label">Phase 4 · The Accusation · Round ${state.round}/${MAX_ROUNDS}</div>
-    ${bonusNote}
-    <div class="case-card" style="padding:1rem">
-      <div class="case-title" style="font-size:1rem;margin-bottom:.75rem">Who is the killer?</div>
-      <div class="accusation-grid">${suspHTML}</div>
+    <div class="panel-card">
+      <div class="panel-title" style="color:var(--teal2);font-size:1.2rem;text-align:center">Round ${state.round} Results</div>
+      <div style="text-align:center;font-size:.85rem;color:var(--text3);margin-bottom:1rem">Answer: <span style="color:var(--text);font-family:'JetBrains Mono',monospace">${state.currentPuzzle.answer}</span></div>
+      
+      <div style="display:flex;gap:1rem;margin-bottom:1rem">
+        <div style="flex:1;background:var(--surface2);border:1px solid ${state.myResult?'var(--teal)':'var(--red)'};border-radius:var(--radius);padding:1rem;text-align:center">
+          <div style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem">YOU</div>
+          <div style="font-size:1.5rem;font-family:'JetBrains Mono',monospace;color:${state.myResult?'var(--teal)':'var(--red)'}">${state.myResult?'Correct':'Wrong'}</div>
+          <div style="font-size:.8rem;color:var(--gold2);margin-top:.5rem">+${myPts} pts</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:.2rem">${state.myPuzzleTime}s</div>
+        </div>
+        <div style="flex:1;background:var(--surface2);border:1px solid ${state.oppResult?'var(--teal)':'var(--red)'};border-radius:var(--radius);padding:1rem;text-align:center">
+          <div style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem">OPPONENT</div>
+          <div style="font-size:1.5rem;font-family:'JetBrains Mono',monospace;color:${state.oppResult?'var(--teal)':'var(--red)'}">${state.oppResult?'Correct':'Wrong'}</div>
+          <div style="font-size:.8rem;color:var(--purple2);margin-top:.5rem">+${oppPts} pts</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:.2rem">${state.oppPuzzleTime}s</div>
+        </div>
+      </div>
+      
+      <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--text3);padding:.5rem">Overall: <span style="color:var(--gold2)">${state.myScore}</span> vs <span style="color:var(--purple2)">${state.oppScore}</span></div>
+      <button class="btn btn-gold" style="width:100%;margin-top:.5rem" onclick="nextRound()">${isLastRound?'See Final Results →':'Next Round →'}</button>
     </div>
-    <div class="case-card" style="padding:1rem">
-      <div class="case-title" style="font-size:1rem;margin-bottom:.75rem">What was their motive?</div>
-      <div class="motive-select">${motHTML}</div>
-    </div>
-    <button class="btn btn-gold" style="width:100%" onclick="submitAccusation()" id="accuse-btn">Accuse Now →</button>
-    <div id="waiting-opp-msg" style="display:none;text-align:center;color:var(--text3);font-size:.8rem;font-family:'JetBrains Mono',monospace;margin-top:.5rem">Waiting for ${state.oppName}…</div>
   `);
-  setPips([0,1,2,3]);selectedSuspectIdx=null;selectedMotiveIdx=null;
-}
-let selectedSuspectIdx=null,selectedMotiveIdx=null;
-function selectSuspect(i){selectedSuspectIdx=i;document.querySelectorAll('.suspect-card').forEach((el,j)=>el.classList.toggle('selected',j===i));}
-function selectMotive(i){selectedMotiveIdx=i;document.querySelectorAll('.motive-btn').forEach((el,j)=>el.classList.toggle('selected',j===i));}
-function submitAccusation(){
-  if(selectedSuspectIdx===null){toast("Choose a suspect","error");return}
-  if(selectedMotiveIdx===null){toast("Choose a motive","error");return}
-  const c=state.currentCase;
-  state.myAccusation={suspect:c.suspects[selectedSuspectIdx].name,motive:MOTIVES[selectedMotiveIdx],profileBonus:state.profileBonus};
-  document.getElementById('accuse-btn').disabled=true;document.getElementById('waiting-opp-msg').style.display='block';
-  sendMsg_raw({type:"accusation",suspect:state.myAccusation.suspect,motive:state.myAccusation.motive});
-  addLog("You accused: "+state.myAccusation.suspect,"you");
-  if(state.isSolo)simulateOppAccusation();
-  else if(state.oppAccusation)resolveRound();
-}
-function simulateOppAccusation(){
-  const c=state.currentCase;const suspects=c.suspects.map(s=>s.name);const isCorrect=Math.random()>0.4;
-  state.oppAccusation={suspect:isCorrect?c.killer:suspects.find(s=>s!==c.killer),motive:isCorrect?c.motive:MOTIVES[Math.floor(Math.random()*4)]};
-  setTimeout(()=>resolveRound(),500);
-}
-function resolveRound(){
-  const c=state.currentCase;
-  const myCS=state.myAccusation.suspect===c.killer,myCM=state.myAccusation.motive===c.motive;
-  const oppCS=state.oppAccusation&&state.oppAccusation.suspect===c.killer,oppCM=state.oppAccusation&&state.oppAccusation.motive===c.motive;
-  let myPts=0,oppPts=0;const breakdown=[];
-  if(myCS){myPts+=50;breakdown.push({label:"Correct suspect",val:"+50 pts",you:true})}
-  if(myCM){myPts+=30;breakdown.push({label:"Correct motive",val:"+30 pts",you:true})}
-  if(state.profileBonus){myPts+=25;breakdown.push({label:"Cold Read bonus",val:"+25 pts",you:true})}
-  if(state.myPuzzleTime&&state.oppPuzzleTime&&state.myPuzzleTime<state.oppPuzzleTime){myPts+=10;breakdown.push({label:"Faster puzzle solve",val:"+10 pts",you:true})}
-  if(state.puzzleSolved){myPts+=15;breakdown.push({label:"Puzzle solved correctly",val:"+15 pts",you:true})}
-  if(oppCS){oppPts+=50;breakdown.push({label:"Opp correct suspect",val:"+50 pts",you:false})}
-  if(oppCM){oppPts+=30;breakdown.push({label:"Opp correct motive",val:"+30 pts",you:false})}
-  state.myScore+=myPts;state.oppScore+=oppPts;updateHeader();
-  const revealHTML=c.suspects.map(s=>`<div class="suspect-card ${s.name===c.killer?'revealed-correct':'revealed-wrong'}" style="cursor:default"><div class="suspect-name">${s.name}${s.name===c.killer?` <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--teal)">✓ KILLER</span>`:''}</div><div class="suspect-role">${s.role}</div></div>`).join('');
-  const isLastRound=state.round>=MAX_ROUNDS;
-  mainPanel(`
-    <div class="case-card">
-      <div class="case-title" style="color:var(--teal2);font-size:1.1rem">Round ${state.round}/${MAX_ROUNDS} Resolved</div>
-      <div class="case-location">Killer: ${c.killer} · Motive: ${c.motive}</div>
-    </div>
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .85rem;font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--text3);margin-bottom:.5rem">
-      <span style="color:var(--amber2)">Puzzle used:</span> ${state.currentPuzzle?state.currentPuzzle.label:'—'}
-    </div>
-    <div class="accusation-grid">${revealHTML}</div>
-    <div style="display:flex;flex-direction:column;gap:.4rem">
-      ${breakdown.map(b=>`<div style="display:flex;justify-content:space-between;padding:.4rem;background:${b.you?'rgba(201,162,39,.05)':'rgba(142,68,173,.05)'};border:1px solid ${b.you?'rgba(201,162,39,.2)':'rgba(142,68,173,.2)'};border-radius:var(--radius);font-size:.82rem"><span style="color:var(--text3)">${b.you?'YOU':'OPP'} · ${b.label}</span><span style="font-family:'JetBrains Mono',monospace;color:${b.you?'var(--gold2)':'var(--purple2)'}">${b.val}</span></div>`).join('')}
-    </div>
-    <div style="display:flex;gap:1rem;margin-top:.5rem">
-      <div style="flex:1;background:var(--surface2);border-radius:var(--radius);padding:.75rem;text-align:center"><div style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace">YOU gained</div><div style="font-size:1.5rem;font-family:'JetBrains Mono',monospace;color:var(--gold2)">+${myPts}</div></div>
-      <div style="flex:1;background:var(--surface2);border-radius:var(--radius);padding:.75rem;text-align:center"><div style="font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace">OPP gained</div><div style="font-size:1.5rem;font-family:'JetBrains Mono',monospace;color:var(--purple2)">+${oppPts}</div></div>
-    </div>
-    <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text3);padding:.5rem">Total: <span style="color:var(--gold2)">${state.myScore}</span> vs <span style="color:var(--purple2)">${state.oppScore}</span> · ${isLastRound?'Final round!':'Round '+(state.round+1)+' up next'}</div>
-    <button class="btn btn-gold" style="width:100%" onclick="nextRound()">${isLastRound?'See Final Results →':'Next Round →'}</button>
-  `);
-  state.myAccusation=null;state.oppAccusation=null;state.myPuzzleTime=null;state.oppPuzzleTime=null;
-  state.profileBonus=false;selectedPuzzleOpt=null;state.nextRoundLock=false;
-}
-function nextRound(){if(state.nextRoundLock)return;state.nextRoundLock=true;sendMsg_raw({type:"next_round"});advanceRound();}
-function advanceRound(){
-  if(state.round>=MAX_ROUNDS){endGame();return}
-  state.round++;updateHeader();
-  state.myHypothesis="";state.oppHypothesis="";state.correctionCount=0;
-  state.assignedOppTraits=shuffleArr([...TRAITS]).slice(0,2).map(t=>t.id);
-  if(!state.isSolo&&state.isHost){
-    const cIdx=pickNextCase();const pIdx=pickNextPuzzle();
-    state.currentCase=CASES[cIdx];state.currentPuzzle=ALL_PUZZLES[pIdx];
-    sendMsg_raw({type:"new_round_data",caseIndex:cIdx,puzzleIndex:pIdx,usedCases:state.usedCaseIndices,usedPuzzles:state.usedPuzzleIndices});
-  } else if(state.isSolo){
-    const cIdx=pickNextCase();const pIdx=pickNextPuzzle();
-    state.currentCase=CASES[cIdx];state.currentPuzzle=ALL_PUZZLES[pIdx];
-  }
-  showPhaseTransition("Round "+state.round,"New Case","Fresh evidence, fresh suspects",()=>renderPhase1());
+  state.nextRoundLock=false;
 }
 
-// ── TELEMETRY ─────────────────────────────────────────────────────────────────
+function nextRound(){
+  if(state.nextRoundLock)return;
+  state.nextRoundLock=true;
+  sendMsg_raw({type:"next_round"});
+  advanceRound();
+}
+
+function advanceRound(){
+  if(state.round>=MAX_ROUNDS){endGame();return}
+  state.round++; updateHeader();
+  loadRoundPuzzle();
+}
+
+// ── TELEMETRY & CHAT ──────────────────────────────────────────────────────────
 function startTelemetry(){
-  state.telemInterval=setInterval(()=>{state.myTelem.corrections=Math.min(100,state.correctionCount);sendMsg_raw({type:"telem",telem:state.myTelem});if(state.isSolo)simulateOppTelem();updateTelemUI();},3000);
+  state.telemInterval=setInterval(()=>{
+    state.myTelem.corrections=Math.min(100,state.correctionCount);
+    sendMsg_raw({type:"telem",telem:state.myTelem});
+    if(state.isSolo)simulateOppTelem();
+    updateTelemUI();
+  },3000);
   document.addEventListener('keydown',e=>{if(e.key==='Backspace')state.correctionCount++;});
 }
 function simulateOppTelem(){state.oppTelem={hesitation:Math.random()*5,corrections:Math.random()*8,puzzleTime:state.oppTelem.puzzleTime||Math.random()*30};}
@@ -1172,10 +781,9 @@ function setTelem(who,t){
   document.getElementById('telem-hes-'+who+'-v').textContent=t.hesitation?t.hesitation.toFixed(1):'0';
   document.getElementById('telem-cor-'+who+'-v').textContent=Math.round(t.corrections)||0;
 }
-function updateTelemYouSpeed(t){document.getElementById('telem-spd-you').style.width=Math.max(0,100-t*1.8)+'%';document.getElementById('telem-spd-you-v').textContent=t+'s';}
-function updateTelemOppSpeed(t){const el=document.getElementById('telem-spd-opp');if(el)el.style.width=Math.max(0,100-t*1.8)+'%';const vel=document.getElementById('telem-spd-opp-v');if(vel)vel.textContent=t+'s';}
+function updateTelemYouSpeed(t){document.getElementById('telem-spd-you').style.width=Math.max(0,100-(t/state.puzzleTimeLimit)*100)+'%';document.getElementById('telem-spd-you-v').textContent=t+'s';}
+function updateTelemOppSpeed(t){const el=document.getElementById('telem-spd-opp');if(el)el.style.width=Math.max(0,100-(t/state.puzzleTimeLimit)*100)+'%';const vel=document.getElementById('telem-spd-opp-v');if(vel)vel.textContent=t+'s';}
 
-// ── MESSAGING ─────────────────────────────────────────────────────────────────
 function sendMsg(){const input=document.getElementById('msg-input');if(!input)return;const txt=input.value.trim();if(!txt)return;input.value='';addChatMsg(txt,true);sendMsg_raw({type:"chat",text:txt});}
 function addChatMsg(txt,isMe){const log=document.getElementById('msg-log');if(!log)return;const div=document.createElement('div');div.className='msg-item '+(isMe?'you-msg':'opp-msg');div.textContent=(isMe?'You':state.oppName)+': '+txt;log.appendChild(div);log.scrollTop=log.scrollHeight;}
 function addLog(text,who){const log=document.getElementById('activity-log');if(!log)return;const div=document.createElement('div');div.className='log-entry';const now=new Date();const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');div.innerHTML=`<span class="log-time">${t}</span><span class="log-text ${who}">${text}</span>`;log.appendChild(div);log.scrollTop=log.scrollHeight;}
@@ -1185,25 +793,22 @@ function sendStatus(s){sendMsg_raw({type:"opp_status",status:s});}
 function mainPanel(html){document.getElementById('main-panel').innerHTML=html;}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function updateHeader(){document.getElementById('hdr-round').textContent=state.round;document.getElementById('you-score-hdr').textContent=state.myScore;document.getElementById('opp-score-hdr').textContent=state.oppScore;document.getElementById('you-name-hdr').textContent=state.myName;document.getElementById('opp-name-hdr').textContent=state.oppName;}
-function updatePhaseLabel(label){document.getElementById('hdr-phase-label').textContent=label;}
-function setPips(donePips){[0,1,2,3].forEach(i=>{const el=document.getElementById('pip-'+i);if(!el)return;el.className='phase-pip'+(donePips.includes(i)?' done':'');});}
-function showPhaseTransition(number,name,sub,cb){const ov=document.getElementById('phase-transition');document.getElementById('pt-number').textContent=number;document.getElementById('pt-name').textContent=name;document.getElementById('pt-sub').textContent=sub;ov.classList.add('show');setTimeout(()=>{ov.classList.remove('show');if(cb)cb();},2000);}
+function showPhaseTransition(number,name,sub,cb){const ov=document.getElementById('phase-transition');document.getElementById('pt-number').textContent=number;document.getElementById('pt-name').textContent=name;document.getElementById('pt-sub').textContent=sub;ov.classList.add('show');setTimeout(()=>{ov.classList.remove('show');if(cb)cb();},1500);}
 function toast(msg,type='info'){const c=document.getElementById('toasts');const d=document.createElement('div');d.className='toast '+type;d.textContent=msg;c.appendChild(d);setTimeout(()=>d.remove(),3200);}
-function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 // ── END GAME ──────────────────────────────────────────────────────────────────
 function endGame(){
   clearInterval(state.telemInterval);clearInterval(state.timerInterval);showScreen('result-screen');
   const won=state.myScore>state.oppScore,tied=state.myScore===state.oppScore;
-  document.getElementById('result-title').textContent=tied?"A Draw!":won?"Case Closed":"Case Unsolved";
+  document.getElementById('result-title').textContent=tied?"A Draw!":won?"Victory":"Defeat";
   document.getElementById('result-title').className='result-title '+(won?'result-win':'result-lose');
-  document.getElementById('result-subtitle').textContent=won?`${state.myName} wins over ${state.oppName}`:`${state.oppName} outread ${state.myName}`;
+  document.getElementById('result-subtitle').textContent=won?`${state.myName} outsmarted ${state.oppName}`:`${state.oppName} outsmarted ${state.myName}`;
   document.getElementById('result-score-big').textContent=state.myScore+" : "+state.oppScore;
   document.getElementById('result-breakdown').innerHTML=`
     <div class="result-row"><span class="result-row-label">Rounds played</span><span class="result-row-val">${state.round}</span></div>
-    <div class="result-row"><span class="result-row-label">Your score</span><span class="result-row-val">${state.myScore} pts</span></div>
-    <div class="result-row"><span class="result-row-label">${state.oppName}'s score</span><span class="result-row-val">${state.oppScore} pts</span></div>
-    <div class="result-row"><span class="result-row-label">Max possible</span><span class="result-row-val">${MAX_ROUNDS*130} pts</span></div>`;
+    <div class="result-row"><span class="result-row-label">Your final score</span><span class="result-row-val">${state.myScore} pts</span></div>
+    <div class="result-row"><span class="result-row-label">${state.oppName}'s final score</span><span class="result-row-val">${state.oppScore} pts</span></div>
+  `;
 }
 
 initPeer();
